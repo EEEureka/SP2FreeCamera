@@ -126,7 +126,7 @@ foreach ($file in Get-ChildItem -LiteralPath $resolvedVerify -Recurse -File | Wh
     $text = Get-Content -LiteralPath $file.FullName -Raw
     if ($text -match '(?i)[A-Z]:\\Users\\[^\\\r\n]+' -or
         $text -match '(?i)\\\\[^\\\s]+\\[^\\\s]+' -or
-        $text -match '(?i)\b(?:10\.|192\.168\.|172\.(?:1[6-9]|2[0-9]|3[01])\.)\d{1,3}(?:\.\d{1,3}){2}\b') {
+        $text -match '(?i)(?<!\d)(?:10(?:\.\d{1,3}){3}|192\.168(?:\.\d{1,3}){2}|172\.(?:1[6-9]|2[0-9]|3[01])(?:\.\d{1,3}){2})(?!\d)') {
         throw "Release privacy verification found a user path, UNC path, or private-network address in $($file.Name)."
     }
 }

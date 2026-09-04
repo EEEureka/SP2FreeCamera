@@ -1,27 +1,29 @@
+[简体中文](doc/README.zh-CN.md)
+
 # SP2 Free Camera
 
-`SP2 Free Camera` 是适用于 Windows x64 版 `SimplePlanes 2` 的本地自由相机插件。
-当前版本为 `0.6.5`，使用 `BepInEx 5 Mono x64` 加载，已针对游戏版本 `0.7.6.100f`
-构建。插件只操作本地相机和本地 UI，不修改载具物理，不发送网络消息，也不依赖其他自定义插件。
+`SP2 Free Camera` is a local free-camera plugin for the Windows x64 edition of
+`SimplePlanes 2`. The current version is `0.6.5`. It uses the BepInEx 5 Mono x64
+runtime and is built for game version `0.7.6.100f`. The plugin only controls the
+local camera and local UI: it does not modify vehicle physics, send network
+messages, or depend on other custom plugins.
 
-## 直接安装
+## Direct installation
 
-仓库的 `release` 目录提供可部署压缩包：
+The `release` directory contains a ready-to-install archive:
 
-```text
-release/SP2FreeCamera-v0.6.5-win-x64.zip
-```
+[`release/SP2FreeCamera-v0.6.5-win-x64.zip`](release/SP2FreeCamera-v0.6.5-win-x64.zip)
 
-压缩包已经包含 Free Camera DLL 和完整的 BepInEx `5.4.23.5` Windows x64 运行时，
-不需要另行安装 BepInEx。
+The archive includes both the Free Camera DLL and the complete BepInEx `5.4.23.5`
+Windows x64 runtime, so BepInEx does not need to be installed separately.
 
-1. 完全关闭 `SimplePlanes 2`。
-2. 打开压缩包，将其中全部内容直接解压到游戏根目录，也就是
-   `SimplePlanes 2.exe` 所在目录。
-3. 如果系统询问是否合并 `BepInEx` 文件夹，选择合并。
-4. 启动游戏并进入飞行场景。
+1. Close `SimplePlanes 2` completely.
+2. Extract everything from the archive directly into the game directory—the
+   directory that contains `SimplePlanes 2.exe`.
+3. If Windows asks whether to merge the `BepInEx` directory, allow it.
+4. Start the game and enter a flight scene.
 
-安装后的关键文件结构如下：
+The important installed files are:
 
 ```text
 SimplePlanes 2/
@@ -35,114 +37,135 @@ SimplePlanes 2/
 └─ SimplePlanes 2.exe
 ```
 
-发布包不包含 `BepInEx/config`、日志、缓存或其他插件，所以覆盖安装不会重置现有
-Free Camera 配置。压缩包的 SHA-256 位于 `release/SHA256SUMS.txt`。
+The release archive does not contain `BepInEx/config`, logs, caches, or other
+plugins, so installing it over an existing setup will not reset Free Camera
+settings. The archive checksum is recorded in
+[`release/SHA256SUMS.txt`](release/SHA256SUMS.txt).
 
-## 默认操作
+## Default controls
 
-| 操作 | 默认输入 |
+| Action | Default input |
 | --- | --- |
-| 进入/退出自由相机 | `Insert` |
-| 打开/关闭独立菜单 | `ScrollLock` |
-| 向前/向后移动 | `W` / `S` |
-| 向左/向右移动 | `A` / `D` |
-| 向上/向下移动 | `E` / `Q` |
-| 普通/快速速度切换 | `Keypad5` |
-| 锁定自己的载具或角色 | `Backspace` |
-| 锁定游戏当前选中的目标 | `-`（主键盘数字行） |
-| 锁定鼠标下的地形、部件或移动对象 | 鼠标中键 |
-| 解除锁定并自由观察 | 按住鼠标左键拖拽 |
-| 调整 FOV | 鼠标滚轮 |
+| Enter or exit free camera | `Insert` |
+| Open or close the standalone settings menu | `ScrollLock` |
+| Move forward or backward | `W` / `S` |
+| Move left or right | `A` / `D` |
+| Move up or down | `E` / `Q` |
+| Toggle normal and fast movement speed | `Keypad5` |
+| Focus on your current vehicle or avatar | `Backspace` |
+| Focus on the target selected by the game | `-` on the main keyboard number row |
+| Focus on terrain, a part, or a moving object under the pointer | Middle mouse button |
+| Clear focus and look freely | Hold and drag the left mouse button |
+| Adjust field of view | Mouse wheel |
 
-普通移动速度默认是 `200 m/s`，快速移动速度默认是 `2000 m/s`。从旧版本升级时，
-插件只会把仍等于旧默认值 `20/200 m/s` 的对应配置迁移为新默认值；其他自定义速度保持不变。
+The default normal movement speed is `200 m/s`, and the default fast movement
+speed is `2000 m/s`. When upgrading from an older version, the plugin only
+migrates values that are still exactly equal to the old `20/200 m/s` defaults;
+all other custom speed values are preserved.
 
-配置文件在首次运行后生成：
+The configuration file is generated after the first run:
 
 ```text
 BepInEx/config/local.sp2.freecamera.cfg
 ```
 
-插件内置 English 和简体中文界面。可从快捷菜单或完整设置菜单切换语言。
+The plugin includes English and Simplified Chinese interfaces. The language can
+be changed from either the quick menu or the full settings menu.
 
-## 锁定行为
+## Lock-on behavior
 
-- 部件、离架武器、动态地面目标、自己的载具/角色和游戏当前目标，会在每个画面帧
-  读取当前原始目标点并直接调整相机朝向。
-- 动态锁定不使用目标预测或聚焦平滑，也不会带动相机位置。
-- 菜单中的“地形点锁定平滑时间”只影响地形点等静态焦点。
-- 左键开始拖拽后会解除当前锁定，恢复自由观察。
+- Aircraft parts, released weapons, dynamic ground targets, your current
+  vehicle or avatar, and the target selected by the game are resolved at their
+  current raw positions every rendered frame, and the camera rotation is updated
+  directly toward them.
+- Dynamic lock-on does not use target prediction or focus smoothing and never
+  moves the camera position.
+- The menu's terrain-point lock smoothing setting only affects static focus
+  points such as terrain.
+- Starting a left-button drag clears the active lock and returns to free look.
 
-## 卸载
+## Uninstallation
 
-只卸载 Free Camera 时，删除：
+To remove only Free Camera, delete:
 
 ```text
 BepInEx/plugins/SP2FreeCamera.dll
 ```
 
-如果还有其他插件使用 BepInEx，请勿删除 `BepInEx`、`winhttp.dll` 或
-`doorstop_config.ini`。
+Do not remove `BepInEx`, `winhttp.dll`, or `doorstop_config.ini` if other plugins
+still use BepInEx.
 
-## 隐私与发布边界
+## Privacy and release scope
 
-- 插件没有遥测、联网更新或数据上传功能。
-- 仓库和发布包不包含个人配置、运行日志、缓存、账户信息、访问令牌、私网地址或
-  开发机器的绝对路径。
-- 游戏内目标名称仅用于本地界面展示；写入 BepInEx 日志时使用不含目标名称的通用提示。
-- 分享 `BepInEx/LogOutput.log` 前仍建议自行检查其中由游戏或其他插件产生的内容。
-- 发布包中的 BepInEx 来自官方 `5.4.23.5` Windows x64 发行包，并使用固定 SHA-256
-  校验；不会从本机游戏目录复制 BepInEx、配置或其他插件。
+- The plugin has no telemetry, online update mechanism, or data-upload feature.
+- The repository and release archive do not include personal configuration,
+  runtime logs, caches, account details, access tokens, private-network
+  addresses, or developer-machine absolute paths.
+- Target names are displayed only in the local UI. Generic messages without
+  target names are written to the BepInEx log.
+- Logs produced by the game or other plugins may contain unrelated information;
+  review `BepInEx/LogOutput.log` before sharing it.
+- BepInEx in the release archive comes from the official `5.4.23.5` Windows x64
+  release and is verified against a pinned SHA-256 checksum. It is never copied
+  from the local game installation.
 
-第三方组件及许可证见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。本仓库尚未为
-Free Camera 自身声明开源许可证；第三方许可证不授予 Free Camera 源码的再发布权。
+See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for third-party components
+and licenses. This repository currently does not declare an open-source license
+for the Free Camera source code; the bundled third-party licenses do not grant
+redistribution rights for that source code.
 
-## 从源码构建
+## Building from source
 
-构建需要：
+Requirements:
 
-- Windows PowerShell 5.1 或 PowerShell 7
-- Visual Studio Build Tools（Roslyn C# 编译器）
-- 本机安装的 `SimplePlanes 2`
+- Windows PowerShell 5.1 or PowerShell 7
+- Visual Studio Build Tools with the Roslyn C# compiler
+- A local installation of `SimplePlanes 2`
 
-通过环境变量指定游戏目录，然后构建：
+Set the game directory and build:
 
 ```powershell
 $env:SP2_GAME_DIR = '<SteamLibrary>\steamapps\common\SimplePlanes 2'
 .\build.ps1
 ```
 
-如果脚本无法自动找到编译器，可显式传入一个通用位置：
+If the compiler cannot be found automatically, provide a generic compiler path:
 
 ```powershell
 .\build.ps1 -Csc '<VisualStudio>\MSBuild\Current\Bin\Roslyn\csc.exe'
 ```
 
-构建并生成完整可部署压缩包：
+Build the DLL and create the complete ready-to-install archive:
 
 ```powershell
 .\build.ps1 -Package
 ```
 
-构建并部署 DLL 到本机游戏（游戏运行时脚本会拒绝覆盖）：
+Build and deploy the DLL to the local game installation. The script refuses to
+overwrite the DLL while the game is running:
 
 ```powershell
 .\build.ps1 -Deploy
 ```
 
-构建结果位于 `bin/SP2FreeCamera.dll`，发布包位于 `release`。打包脚本只会从
-BepInEx 官方发行地址下载版本 `5.4.23.5`，并校验官方 SHA-256：
+The DLL is written to `bin/SP2FreeCamera.dll`, and the archive is written to
+`release`. The packaging script downloads only the official BepInEx `5.4.23.5`
+archive and verifies this pinned SHA-256 checksum:
 
 ```text
 82f9878551030f54657792c0740d9d51a09500eeae1fba21106b0c441e6732c4
 ```
 
-`verify-release.ps1` 会复核压缩包文件白名单、BepInEx 逐文件哈希、DLL 版本，
-并扫描本机用户路径、仓库路径、UNC 路径和私网地址。
+`verify-release.ps1` checks the archive allowlist, every bundled BepInEx file,
+the plugin DLL version, and the absence of local user paths, repository paths,
+UNC paths, and private-network addresses.
 
-## 当前边界
+## Current limitations
 
-- 当前仅支持非 VR 飞行场景。
-- 最小 FOV 为 `0.1°`；极小 FOV 会使用自定义透视矩阵。
-- 如果目标原始 Transform 只在物理帧更新，逐画面帧直瞄仍只能使用当时可见的原始位置。
-- 实际游戏版本升级后，建议重新构建并进行飞行场景回归测试。
+- Only non-VR flight scenes are currently supported.
+- The minimum field of view is `0.1°`; a custom projection matrix is used for
+  extremely small values.
+- If a target's original transform is updated only on physics ticks, aiming on
+  every rendered frame can only use the latest raw position available to that
+  frame.
+- Rebuild and perform an in-flight regression test after the game is updated.

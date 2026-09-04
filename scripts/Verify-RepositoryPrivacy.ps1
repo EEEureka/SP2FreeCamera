@@ -42,7 +42,7 @@ foreach ($file in $files) {
         }
     }
 
-    if ($text -match '(?i)\b(?:10\.|192\.168\.|172\.(?:1[6-9]|2[0-9]|3[01])\.)\d{1,3}(?:\.\d{1,3}){2}\b' -or
+    if ($text -match '(?i)(?<!\d)(?:10(?:\.\d{1,3}){3}|192\.168(?:\.\d{1,3}){2}|172\.(?:1[6-9]|2[0-9]|3[01])(?:\.\d{1,3}){2})(?!\d)' -or
         $text -match '(?i)https?://[^/\s:@]+:[^/\s@]+@') {
         $failures.Add($file.FullName.Substring($RepositoryRoot.Length + 1))
     }
