@@ -23,6 +23,9 @@ Default controls:
 - Hold and drag the left mouse button: clear focus and look freely
 - Mouse wheel: adjust field of view
 
+Moving targets use immediate per-render-frame rotation. Mouse-wheel zoom remains
+independent and uses the configured FOV smoothing time even while focused.
+
 Uninstallation:
 Delete BepInEx\plugins\SP2FreeCamera.dll. Do not remove BepInEx, winhttp.dll,
 or doorstop_config.ini if other plugins still use BepInEx.

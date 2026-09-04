@@ -3,7 +3,7 @@
 # SP2 Free Camera
 
 `SP2 Free Camera` is a local free-camera plugin for the Windows x64 edition of
-`SimplePlanes 2`. The current version is `0.6.5`. It uses the BepInEx 5 Mono x64
+`SimplePlanes 2`. The current version is `0.6.6`. It uses the BepInEx 5 Mono x64
 runtime and is built for game version `0.7.6.100f`. The plugin only controls the
 local camera and local UI: it does not modify vehicle physics, send network
 messages, or depend on other custom plugins.
@@ -12,7 +12,7 @@ messages, or depend on other custom plugins.
 
 The `release` directory contains a ready-to-install archive:
 
-[`release/SP2FreeCamera-v0.6.5-win-x64.zip`](release/SP2FreeCamera-v0.6.5-win-x64.zip)
+[`release/SP2FreeCamera-v0.6.6-win-x64.zip`](release/SP2FreeCamera-v0.6.6-win-x64.zip)
 
 The archive includes both the Free Camera DLL and the complete BepInEx `5.4.23.5`
 Windows x64 runtime, so BepInEx does not need to be installed separately.
@@ -80,6 +80,8 @@ be changed from either the quick menu or the full settings menu.
   directly toward them.
 - Dynamic lock-on does not use target prediction or focus smoothing and never
   moves the camera position.
+- Mouse-wheel zoom remains independent of target focus and always uses the
+  configured FOV smoothing time.
 - The menu's terrain-point lock smoothing setting only affects static focus
   points such as terrain.
 - Starting a left-button drag clears the active lock and returns to free look.

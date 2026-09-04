@@ -312,7 +312,7 @@ namespace SP2FreeCamera
                 Vector3d frozenFocus = _hasFocusTrackingState
                     ? _renderedFocusGlobalPosition
                     : _lastFocusGlobalPosition;
-                TrackGlobalPosition(frozenFocus, false);
+                TrackImmediateGlobalPosition(frozenFocus);
                 return;
             }
 
@@ -1244,7 +1244,7 @@ namespace SP2FreeCamera
             UpdateFloatingOriginFocus();
         }
 
-        private void TrackGlobalPosition(Vector3d focusGlobalPosition, bool smoothRotation)
+        private void TrackImmediateGlobalPosition(Vector3d focusGlobalPosition)
         {
             Vector3d cameraGlobalPosition = ToGlobalPosition(CameraTransform.position);
             Vector3 direction = (Vector3)(focusGlobalPosition - cameraGlobalPosition);
@@ -1254,30 +1254,9 @@ namespace SP2FreeCamera
                 return;
             }
 
-            if (!smoothRotation)
-            {
-                CameraTransform.rotation = desiredRotation;
-            }
-            else
-            {
-                float smoothingTime = NumericUtility.ClampFinite(
-                    _runtime.Settings.FocusSmoothingTime.Value,
-                    0.08f,
-                    0f,
-                    0.5f);
-                float deltaTime = NumericUtility.ClampFinite(
-                    Time.unscaledDeltaTime,
-                    0f,
-                    0f,
-                    MaximumTrackingDeltaTime);
-                float blend = smoothingTime <= 0.0001f
-                    ? 1f
-                    : 1f - Mathf.Exp(-deltaTime / smoothingTime);
-                CameraTransform.rotation = Quaternion.Slerp(
-                    CameraTransform.rotation,
-                    desiredRotation,
-                    blend);
-            }
+            // Moving-target focus owns rotation only. It never changes the
+            // separately configured FOV smoothing path.
+            CameraTransform.rotation = desiredRotation;
 
             UpdateFloatingOriginFocus();
         }
@@ -1287,7 +1266,7 @@ namespace SP2FreeCamera
             _renderedFocusGlobalPosition = focusGlobalPosition;
             _hasFocusTrackingState = true;
             _focusTrackingSuspended = false;
-            TrackGlobalPosition(focusGlobalPosition, false);
+            TrackImmediateGlobalPosition(focusGlobalPosition);
         }
 
         private void TrackGuardedDynamicPosition(
@@ -1507,6 +1486,8 @@ namespace SP2FreeCamera
 
         private void UpdateSmoothedFov(float unscaledDeltaTime)
         {
+            // FOV smoothing is independent of focus mode. Dynamic targets snap
+            // camera rotation, while scroll zoom always uses this menu setting.
             float maximumFov = NumericUtility.ClampFinite(
                 _runtime.Settings.MaximumFov.Value,
                 120f,
@@ -1525,7 +1506,7 @@ namespace SP2FreeCamera
 
             float smoothingTime = NumericUtility.ClampFinite(
                 _runtime.Settings.FovSmoothingTime.Value,
-                0.12f,
+                Plugin.DefaultFovSmoothingTime,
                 0f,
                 2f);
             if (smoothingTime <= 0.0001f)

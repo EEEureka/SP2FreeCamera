@@ -12,10 +12,11 @@ namespace SP2FreeCamera
     {
         public const string PluginGuid = "local.sp2.freecamera";
         public const string PluginName = "SP2 Free Camera";
-        public const string PluginVersion = "0.6.5";
+        public const string PluginVersion = "0.6.6";
 
         internal const float DefaultNormalSpeed = 200f;
         internal const float DefaultFastSpeed = 2000f;
+        internal const float DefaultFovSmoothingTime = 0.12f;
 
         private const int CurrentKeyBindingRevision = 2;
         private const int CurrentMovementSpeedRevision = 1;
@@ -206,7 +207,7 @@ namespace SP2FreeCamera
             FovSmoothingTime = Config.Bind(
                 "Camera",
                 "FovSmoothingTime",
-                0.12f,
+                DefaultFovSmoothingTime,
                 Localization.Text("ConfigFovSmoothing"));
             MaximumFov = Config.Bind(
                 "Camera",

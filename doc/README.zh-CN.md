@@ -3,14 +3,14 @@
 # SP2 Free Camera（简体中文）
 
 `SP2 Free Camera` 是适用于 Windows x64 版 `SimplePlanes 2` 的本地自由相机插件。
-当前版本为 `0.6.5`，使用 `BepInEx 5 Mono x64` 加载，已针对游戏版本 `0.7.6.100f`
+当前版本为 `0.6.6`，使用 `BepInEx 5 Mono x64` 加载，已针对游戏版本 `0.7.6.100f`
 构建。插件只操作本地相机和本地 UI，不修改载具物理，不发送网络消息，也不依赖其他自定义插件。
 
 ## 直接安装
 
 仓库的 `release` 目录提供可部署压缩包：
 
-[`release/SP2FreeCamera-v0.6.5-win-x64.zip`](../release/SP2FreeCamera-v0.6.5-win-x64.zip)
+[`release/SP2FreeCamera-v0.6.6-win-x64.zip`](../release/SP2FreeCamera-v0.6.6-win-x64.zip)
 
 压缩包已经包含 Free Camera DLL 和完整的 BepInEx `5.4.23.5` Windows x64 运行时，
 不需要另行安装 BepInEx。
@@ -71,6 +71,7 @@ BepInEx/config/local.sp2.freecamera.cfg
 - 部件、离架武器、动态地面目标、自己的载具/角色和游戏当前目标，会在每个画面帧
   读取当前原始目标点并直接调整相机朝向。
 - 动态锁定不使用目标预测或聚焦平滑，也不会带动相机位置。
+- 鼠标滚轮缩放与目标锁定相互独立，始终使用菜单中配置的 FOV 平滑时间。
 - 菜单中的“地形点锁定平滑时间”只影响地形点等静态焦点。
 - 左键开始拖拽后会解除当前锁定，恢复自由观察。
 
