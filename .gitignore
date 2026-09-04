@@ -1,0 +1,16 @@
+/bin/
+/obj/
+/.build/
+/.cache/
+/.vs/
+*.pdb
+*.cfg
+*.log
+*.user
+*.suo
+
+# Release archives are intentionally versioned.
+!/release/
+!/release/*.zip
+!/release/*.txt
+!/release/*.md

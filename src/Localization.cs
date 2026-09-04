@@ -1,0 +1,537 @@
+using System;
+using System.Collections.Generic;
+using BepInEx.Configuration;
+
+namespace SP2FreeCamera
+{
+    internal static class Localization
+    {
+        internal const string EnglishCode = "English";
+        internal const string SimplifiedChineseCode = "SimplifiedChinese";
+
+        private static readonly Dictionary<string, string> English =
+            new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                { "WindowTitle", "SP2 Free Camera" },
+                { "Language", "Language" },
+                { "InterfaceLanguage", "Interface language" },
+                { "LanguageChanged", "Interface language changed." },
+                { "Status", "Status" },
+                { "Camera", "Camera: " },
+                { "FreeCamera", "Free camera" },
+                { "GameCamera", "Game camera" },
+                { "Speed", "Speed: " },
+                { "Fast", "Fast" },
+                { "Normal", "Normal" },
+                { "FocusTarget", "Focus target: " },
+                { "Focus", "Focus: " },
+                { "None", "None" },
+                { "EnterFreeCamera", "Enter free camera" },
+                { "ExitFreeCamera", "Exit free camera" },
+                { "LockSelf", "Focus on self" },
+                { "FocusSelectedTarget", "Focus selected game target" },
+                { "ClearFocus", "Clear focus" },
+                { "ClearLock", "Clear focus" },
+                { "HideGameUi", "Hide game UI" },
+                { "ShowGameUi", "Show game UI" },
+                { "CloseMenu", "Close this menu" },
+                { "BehaviorSettings", "Behavior" },
+                { "EnableFreeCamera", "Enable free camera" },
+                { "AutoHideUi", "Automatically hide game UI when entering free camera" },
+                { "InvertLookY", "Invert vertical look while dragging with the left mouse button" },
+                { "ScaleLookWithFov", "Scale look sensitivity with the current rendered FOV" },
+                { "ShowStatusMessages", "Show status messages while the game UI is visible" },
+                { "ShowQuickMenu", "Show the draggable shortcut in flight scenes" },
+                { "NumericSettings", "Numeric settings" },
+                { "NormalSpeed", "Normal movement speed (m/s)" },
+                { "FastSpeed", "Fast movement speed (m/s)" },
+                { "MovementSmoothingTime", "Movement smoothing time (seconds)" },
+                { "LookSensitivity", "Base left-drag sensitivity (at 60 deg FOV)" },
+                { "LookSmoothingTime", "Left-drag look smoothing time (seconds)" },
+                { "DragThreshold", "Left-drag threshold (pixels)" },
+                { "FovScrollSensitivity", "Mouse-wheel FOV sensitivity" },
+                { "FovSmoothingTime", "FOV smoothing time (seconds)" },
+                { "MaximumFov", "Maximum FOV (degrees)" },
+                { "FocusMaximumDistance", "Focus ray distance (m)" },
+                { "FocusSmoothingTime", "Terrain focus smoothing time (seconds)" },
+                { "NumericHelp", "Set a smoothing time to 0 for immediate response. FOV-based sensitivity uses the rendered view. Minimum FOV is fixed at 0.1 deg." },
+                { "ApplyValues", "Apply values" },
+                { "ReloadValues", "Reload current configuration" },
+                { "ReloadedValues", "Current configuration reloaded." },
+                { "InvalidNumericValues", "Invalid numeric value. Check all inputs." },
+                { "AppliedValues", "Numeric configuration applied." },
+                { "CurrentBindings", "Current key bindings" },
+                { "BindingsHelp", "Key bindings can be changed in BepInEx/config/local.sp2.freecamera.cfg." },
+                { "BindingToggleCamera", "Enter/exit free camera" },
+                { "BindingToggleMenu", "Open/close this menu" },
+                { "BindingMoveForward", "Move forward" },
+                { "BindingMoveBackward", "Move backward" },
+                { "BindingMoveLeft", "Move left" },
+                { "BindingMoveRight", "Move right" },
+                { "BindingMoveUp", "Move up" },
+                { "BindingMoveDown", "Move down" },
+                { "BindingToggleSpeed", "Toggle normal/fast speed" },
+                { "BindingLockSelf", "Focus on self" },
+                { "BindingFocusSelectedTarget", "Focus selected game target" },
+                { "DuplicateKeyWarning", "Notice: {0} is assigned to multiple free-camera actions." },
+                { "FixedMouseControls", "Fixed mouse controls" },
+                { "MouseLeft", "Left mouse drag: smoothly look around and clear the current focus" },
+                { "MouseMiddle", "Middle mouse click: focus on terrain, aircraft parts, or released missiles and bombs under the actual pointer" },
+                { "MouseWheel", "Mouse wheel: smoothly adjust FOV" },
+                { "MouseRight", "Right mouse button: not bound to camera control (clicks are still blocked over plugin menus)" },
+                { "HideUiHelp", "Hide/show UI: {0} (game Screenshot Mode); open free-camera settings: {1}" },
+                { "HideUiShortcutHint", "Hide/show UI: {0}  |  Open settings: {1}" },
+                { "Unbound", "Unbound" },
+                { "InputHelp", "While free camera is active, unmodified W/A/S/D/Q/E are reserved for camera movement and temporarily suppressed in the game's Craft and Character keyboard maps. Mouse, joystick, and right-mouse vehicle controls remain available." },
+                { "CameraLauncher", "Camera" },
+                { "CollapseCamera", "Close" },
+                { "QuickTitle", "Free Camera Quick Controls" },
+                { "SwitchNormalSpeed", "Use normal speed" },
+                { "SwitchFastSpeed", "Use fast speed" },
+                { "HoldButtonsToMove", "Hold a button to move the camera" },
+                { "Forward", "Forward" },
+                { "Backward", "Back" },
+                { "Left", "Left" },
+                { "Right", "Right" },
+                { "Up", "Up" },
+                { "Down", "Down" },
+                { "FullSettings", "Full settings" },
+                { "Collapse", "Collapse" },
+                { "Ready", "Ready" },
+                { "FreeCameraRunning", "Free camera active" },
+                { "FreeCameraDisabled", "Free camera is disabled in the configuration." },
+                { "SceneChangedExit", "The scene changed. Free camera exited safely." },
+                { "GameCameraChangedExit", "The game switched to another camera. Free camera exited." },
+                { "OnlyInFlight", "Free camera can only be enabled in a flight scene." },
+                { "VrNotSupported", "Free camera is not supported in VR mode in this version." },
+                { "FlightCameraNotReady", "The flight camera is not ready. Try again shortly." },
+                { "FreeCameraEnabled", "Free camera enabled." },
+                { "EnableFailed", "Could not enable free camera. The original camera was restored." },
+                { "UiBusy", "The game UI is handling input, so free camera cannot be switched right now." },
+                { "FreeCameraClosed", "Free camera closed." },
+                { "SwitchedFast", "Switched to fast movement." },
+                { "SwitchedNormal", "Switched to normal movement." },
+                { "EnableFirst", "Enable free camera first." },
+                { "LocalPlayerNotReady", "The local player is not ready." },
+                { "NoSelectedGameTarget", "No game target is currently selected." },
+                { "NoControllableUi", "No controllable flight UI is currently available." },
+                { "GameUiShown", "Game UI shown." },
+                { "TargetUnavailable", "The focus target is currently unavailable." },
+                { "FocusCleared", "Focus cleared." },
+                { "SelectionOutsideViewport", "The pointer is outside the camera view, so no target can be selected." },
+                { "RayMiss", "No focusable terrain, aircraft part, dynamic ground target, or released weapon was found under the pointer." },
+                { "LockedFormat", "Focused on {0}." },
+                { "TargetLostFormat", "Focus target lost: {0}" },
+                { "FocusLockedLog", "A focus target was selected." },
+                { "FocusTargetLostLog", "The current focus target was lost." },
+                { "GameUiHiddenFormat", "Game UI hidden. Press {0} to reopen the free-camera menu." },
+                { "GameUiHiddenRestoreFormat", "Game UI hidden. Press {0} to restore it, or {1} to open free-camera settings." },
+                { "TerrainPoint", "terrain point" },
+                { "AircraftPart", "aircraft part" },
+                { "Missile", "missile" },
+                { "Bomb", "bomb" },
+                { "Self", "self" },
+                { "OwnAircraft", "your aircraft" },
+                { "OwnPlayer", "your player" },
+                { "GameTarget", "game target" },
+                { "LaserTarget", "laser target" },
+                { "PartFormat", "part: {0}" },
+                { "MissileFormat", "missile: {0}" },
+                { "BombFormat", "bomb: {0}" },
+                { "ConfigLanguage", "Interface language. Supported values: English and SimplifiedChinese." },
+                { "ConfigEnabled", "Whether free camera can be enabled. The ScrollLock menu can always be opened." },
+                { "ConfigNormalSpeed", "Normal movement speed in metres per second." },
+                { "ConfigFastSpeed", "Fast movement speed in metres per second." },
+                { "ConfigMovementSmoothing", "Smoothing time for camera movement velocity. Set to 0 for immediate acceleration and stopping." },
+                { "ConfigLookSensitivity", "Base rotation angle per pixel while dragging with the left mouse button at 60-degree FOV." },
+                { "ConfigLookSmoothing", "Smoothing time while left-drag look follows its target angle. Set to 0 for immediate rotation." },
+                { "ConfigInvertLookY", "Invert the vertical mouse-look direction." },
+                { "ConfigScaleLookWithFov", "Scale mouse-look sensitivity using the perspective ratio of the current rendered FOV." },
+                { "ConfigDragThreshold", "Start rotating and clear the current focus after the left mouse button moves beyond this pixel distance." },
+                { "ConfigFovSensitivity", "Sensitivity of mouse-wheel FOV adjustment." },
+                { "ConfigFovSmoothing", "Smoothing time for reaching the target FOV. Set to 0 for immediate changes." },
+                { "ConfigMaximumFov", "Maximum FOV allowed by free camera. Minimum FOV is fixed at 0.1 degrees." },
+                { "ConfigFocusDistance", "Maximum distance in metres for middle-click focus selection." },
+                { "ConfigFocusSmoothing", "Rotation smoothing time for terrain-point focus. Moving targets always align to their current raw position every rendered frame and ignore this setting." },
+                { "ConfigAutoHideUi", "Automatically hide the game UI when entering free camera." },
+                { "ConfigShowStatus", "Show free-camera status messages while the game UI is visible." },
+                { "ConfigShowQuickMenu", "Show the draggable free-camera shortcut in flight scenes." },
+                { "ConfigQuickX", "Horizontal shortcut position within the movable screen area, from 0 to 1. Normally saved automatically after dragging." },
+                { "ConfigQuickY", "Vertical shortcut position within the movable screen area, from 0 to 1. Normally saved automatically after dragging." },
+                { "ConfigToggleCamera", "Enter or exit free camera." },
+                { "ConfigToggleMenu", "Show or hide the standalone free-camera menu." },
+                { "ConfigMoveForward", "Move the free camera forward." },
+                { "ConfigMoveBackward", "Move the free camera backward." },
+                { "ConfigMoveLeft", "Move the free camera left." },
+                { "ConfigMoveRight", "Move the free camera right." },
+                { "ConfigMoveUp", "Move the free camera up." },
+                { "ConfigMoveDown", "Move the free camera down." },
+                { "ConfigToggleSpeed", "Toggle normal and fast movement speed." },
+                { "ConfigLockSelf", "Focus the free camera on the local player's current aircraft or avatar." },
+                { "ConfigFocusSelectedTarget", "Focus the free camera on the game target currently selected by the local player's targeting system." },
+                { "ConfigKeyRevision", "Internal key-binding migration revision. Do not edit manually." }
+            };
+
+        private static readonly Dictionary<string, string> SimplifiedChinese =
+            new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                { "WindowTitle", "SP2 自由相机" },
+                { "Language", "语言" },
+                { "InterfaceLanguage", "界面语言" },
+                { "LanguageChanged", "界面语言已切换。" },
+                { "Status", "状态" },
+                { "Camera", "相机：" },
+                { "FreeCamera", "自由相机" },
+                { "GameCamera", "游戏相机" },
+                { "Speed", "速度：" },
+                { "Fast", "快速" },
+                { "Normal", "普通" },
+                { "FocusTarget", "锁定目标：" },
+                { "Focus", "锁定：" },
+                { "None", "无" },
+                { "EnterFreeCamera", "进入自由相机" },
+                { "ExitFreeCamera", "退出自由相机" },
+                { "LockSelf", "锁定自己" },
+                { "FocusSelectedTarget", "锁定当前游戏目标" },
+                { "ClearFocus", "解除目标锁定" },
+                { "ClearLock", "解除锁定" },
+                { "HideGameUi", "隐藏游戏 UI" },
+                { "ShowGameUi", "显示游戏 UI" },
+                { "CloseMenu", "关闭此菜单" },
+                { "BehaviorSettings", "行为设置" },
+                { "EnableFreeCamera", "允许启用自由相机" },
+                { "AutoHideUi", "进入自由相机时自动隐藏游戏 UI" },
+                { "InvertLookY", "反转左键拖拽的垂直观察方向" },
+                { "ScaleLookWithFov", "按当前实际 FOV 的透视比例缩放观察灵敏度" },
+                { "ShowStatusMessages", "游戏 UI 可见时显示状态提示" },
+                { "ShowQuickMenu", "在飞行场景显示可拖动快捷入口" },
+                { "NumericSettings", "数值设置" },
+                { "NormalSpeed", "普通移动速度 (m/s)" },
+                { "FastSpeed", "快速移动速度 (m/s)" },
+                { "MovementSmoothingTime", "位置移动平滑时间 (秒)" },
+                { "LookSensitivity", "左键观察基准灵敏度 (60° FOV)" },
+                { "LookSmoothingTime", "左键观察平滑时间 (秒)" },
+                { "DragThreshold", "左键拖拽阈值 (像素)" },
+                { "FovScrollSensitivity", "滚轮 FOV 灵敏度" },
+                { "FovSmoothingTime", "FOV 平滑时间 (秒)" },
+                { "MaximumFov", "最大 FOV (度)" },
+                { "FocusMaximumDistance", "目标射线距离 (m)" },
+                { "FocusSmoothingTime", "地形点锁定平滑时间 (秒)" },
+                { "NumericHelp", "平滑时间设为 0 可恢复即时响应；FOV 灵敏度缩放使用当前实际画面。最小 FOV 固定为 0.1°。" },
+                { "ApplyValues", "应用数值" },
+                { "ReloadValues", "从当前配置重新读取" },
+                { "ReloadedValues", "已重新读取当前配置。" },
+                { "InvalidNumericValues", "数值格式无效，请检查输入。" },
+                { "AppliedValues", "数值配置已应用。" },
+                { "CurrentBindings", "当前键位" },
+                { "BindingsHelp", "键位可在 BepInEx/config/local.sp2.freecamera.cfg 中修改。" },
+                { "BindingToggleCamera", "进入/退出自由相机" },
+                { "BindingToggleMenu", "打开/关闭此菜单" },
+                { "BindingMoveForward", "向前移动" },
+                { "BindingMoveBackward", "向后移动" },
+                { "BindingMoveLeft", "向左移动" },
+                { "BindingMoveRight", "向右移动" },
+                { "BindingMoveUp", "向上移动" },
+                { "BindingMoveDown", "向下移动" },
+                { "BindingToggleSpeed", "普通/快速速度切换" },
+                { "BindingLockSelf", "锁定自己" },
+                { "BindingFocusSelectedTarget", "锁定当前游戏目标" },
+                { "DuplicateKeyWarning", "提示：键位 {0} 被多个自由相机功能共用。" },
+                { "FixedMouseControls", "固定鼠标操作" },
+                { "MouseLeft", "鼠标左键拖拽：平滑自由观察并解除当前目标锁定" },
+                { "MouseMiddle", "鼠标中键点按：从真实鼠标位置锁定地形、飞机部件或已离架的导弹与炸弹" },
+                { "MouseWheel", "鼠标滚轮：平滑调整 FOV" },
+                { "MouseRight", "鼠标右键：相机操作不绑定（插件菜单区域仍会拦截点击）" },
+                { "HideUiHelp", "隐藏/显示 UI：{0}（游戏原生 Screenshot Mode）；打开自由相机设置：{1}" },
+                { "HideUiShortcutHint", "隐藏/显示 UI：{0}  |  打开设置：{1}" },
+                { "Unbound", "未绑定" },
+                { "InputHelp", "自由相机启用期间，无修饰键的 W/A/S/D/Q/E 专用于移动相机，并在游戏的载具和人物键盘映射中临时禁用；鼠标、手柄及右键载具操控不受影响。" },
+                { "CameraLauncher", "相机" },
+                { "CollapseCamera", "收起相机" },
+                { "QuickTitle", "自由相机快捷控制" },
+                { "SwitchNormalSpeed", "切换普通速度" },
+                { "SwitchFastSpeed", "切换快速速度" },
+                { "HoldButtonsToMove", "按住按钮移动相机" },
+                { "Forward", "前" },
+                { "Backward", "后" },
+                { "Left", "左" },
+                { "Right", "右" },
+                { "Up", "上" },
+                { "Down", "下" },
+                { "FullSettings", "完整设置" },
+                { "Collapse", "收起" },
+                { "Ready", "就绪" },
+                { "FreeCameraRunning", "自由相机运行中" },
+                { "FreeCameraDisabled", "自由相机已在配置中禁用。" },
+                { "SceneChangedExit", "场景已切换，自由相机已安全退出。" },
+                { "GameCameraChangedExit", "游戏已切换到其他相机，自由相机已退出。" },
+                { "OnlyInFlight", "自由相机只能在飞行场景中启用。" },
+                { "VrNotSupported", "当前版本暂不支持在 VR 模式启用自由相机。" },
+                { "FlightCameraNotReady", "飞行相机尚未初始化，请稍后重试。" },
+                { "FreeCameraEnabled", "自由相机已启用。" },
+                { "EnableFailed", "自由相机启用失败，已恢复原相机。" },
+                { "UiBusy", "当前游戏界面正在处理输入，暂时不能切换自由相机。" },
+                { "FreeCameraClosed", "自由相机已关闭。" },
+                { "SwitchedFast", "已切换为快速移动。" },
+                { "SwitchedNormal", "已切换为普通移动。" },
+                { "EnableFirst", "请先启用自由相机。" },
+                { "LocalPlayerNotReady", "当前本地玩家对象尚未就绪。" },
+                { "NoSelectedGameTarget", "当前没有选中的游戏目标。" },
+                { "NoControllableUi", "当前没有可控制的飞行 UI。" },
+                { "GameUiShown", "游戏 UI 已显示。" },
+                { "TargetUnavailable", "目标当前不可用。" },
+                { "FocusCleared", "已解除目标锁定。" },
+                { "SelectionOutsideViewport", "鼠标位置不在相机画面内，无法选择目标。" },
+                { "RayMiss", "鼠标方向未命中可锁定的地形、飞机部件、动态地面目标或离架武器。" },
+                { "LockedFormat", "已锁定 {0}。" },
+                { "TargetLostFormat", "目标已丢失: {0}" },
+                { "FocusLockedLog", "已选择锁定目标。" },
+                { "FocusTargetLostLog", "当前锁定目标已丢失。" },
+                { "GameUiHiddenFormat", "游戏 UI 已隐藏；按 {0} 可重新打开自由相机菜单。" },
+                { "GameUiHiddenRestoreFormat", "游戏 UI 已隐藏；按 {0} 恢复，或按 {1} 打开自由相机设置。" },
+                { "TerrainPoint", "地形点" },
+                { "AircraftPart", "飞机部件" },
+                { "Missile", "导弹" },
+                { "Bomb", "炸弹" },
+                { "Self", "自己" },
+                { "OwnAircraft", "自己的载具" },
+                { "OwnPlayer", "自己的玩家" },
+                { "GameTarget", "游戏目标" },
+                { "LaserTarget", "激光目标" },
+                { "PartFormat", "部件: {0}" },
+                { "MissileFormat", "导弹: {0}" },
+                { "BombFormat", "炸弹: {0}" },
+                { "ConfigLanguage", "界面语言。支持 English 和 SimplifiedChinese。" },
+                { "ConfigEnabled", "是否允许启用自由相机。ScrollLock 菜单始终可以打开。" },
+                { "ConfigNormalSpeed", "普通移动速度，单位为米/秒。" },
+                { "ConfigFastSpeed", "快速移动速度，单位为米/秒。" },
+                { "ConfigMovementSmoothing", "相机移动速度的平滑时间。设为 0 时立即加速和停止。" },
+                { "ConfigLookSensitivity", "60 度 FOV 下按住鼠标左键拖拽时，每像素旋转的基准角度。" },
+                { "ConfigLookSmoothing", "左键自由观察追随目标角度的平滑时间。设为 0 时立即旋转。" },
+                { "ConfigInvertLookY", "反转鼠标垂直观察方向。" },
+                { "ConfigScaleLookWithFov", "按当前实际 FOV 的透视比例缩放鼠标观察灵敏度。" },
+                { "ConfigDragThreshold", "左键移动超过该像素距离后才开始旋转相机并解除目标锁定。" },
+                { "ConfigFovSensitivity", "鼠标滚轮调整 FOV 的灵敏度。" },
+                { "ConfigFovSmoothing", "滚轮缩放到目标 FOV 所需的平滑时间。设为 0 时立即变化。" },
+                { "ConfigMaximumFov", "自由相机允许的最大 FOV。最小 FOV 固定为 0.1 度。" },
+                { "ConfigFocusDistance", "鼠标中键射线能够锁定目标的最大距离，单位为米。" },
+                { "ConfigFocusSmoothing", "锁定地形点时的相机旋转平滑时间。移动目标始终在每个画面帧直接对准当前原始位置，不受此设置影响。" },
+                { "ConfigAutoHideUi", "进入自由相机时自动隐藏游戏 UI。" },
+                { "ConfigShowStatus", "游戏 UI 可见时显示自由相机状态消息。" },
+                { "ConfigShowQuickMenu", "在飞行场景显示可拖动的自由相机快捷入口。" },
+                { "ConfigQuickX", "快捷入口在屏幕可移动区域内的水平位置，范围 0 到 1。通常由拖拽自动保存。" },
+                { "ConfigQuickY", "快捷入口在屏幕可移动区域内的垂直位置，范围 0 到 1。通常由拖拽自动保存。" },
+                { "ConfigToggleCamera", "进入或退出自由相机。" },
+                { "ConfigToggleMenu", "显示或隐藏独立自由相机菜单。" },
+                { "ConfigMoveForward", "自由相机向前移动。" },
+                { "ConfigMoveBackward", "自由相机向后移动。" },
+                { "ConfigMoveLeft", "自由相机向左移动。" },
+                { "ConfigMoveRight", "自由相机向右移动。" },
+                { "ConfigMoveUp", "自由相机向上移动。" },
+                { "ConfigMoveDown", "自由相机向下移动。" },
+                { "ConfigToggleSpeed", "切换普通与快速移动速度。" },
+                { "ConfigLockSelf", "将自由相机锁定到本地玩家当前载具或角色。" },
+                { "ConfigFocusSelectedTarget", "将自由相机锁定到本地玩家目标系统当前选中的游戏目标。" },
+                { "ConfigKeyRevision", "内部键位迁移版本。请勿手动修改。" }
+            };
+
+        private static readonly Dictionary<string, string> KeyByEnglish = CreateReverseMap(English);
+        private static readonly Dictionary<string, string> KeyBySimplifiedChinese =
+            CreateReverseMap(SimplifiedChinese);
+
+        private static ConfigEntry<string> _language;
+
+        internal static bool IsSimplifiedChinese
+        {
+            get
+            {
+                return _language != null && string.Equals(
+                    NormalizeLanguageCode(_language.Value),
+                    SimplifiedChineseCode,
+                    StringComparison.Ordinal);
+            }
+        }
+
+        internal static int LanguageIndex
+        {
+            get { return IsSimplifiedChinese ? 1 : 0; }
+        }
+
+        internal static string CurrentLanguageName
+        {
+            get { return IsSimplifiedChinese ? "简体中文" : "English"; }
+        }
+
+        internal static void Initialize(ConfigEntry<string> language)
+        {
+            _language = language;
+            if (_language == null)
+            {
+                return;
+            }
+
+            string normalized = NormalizeLanguageCode(_language.Value);
+            if (!string.Equals(_language.Value, normalized, StringComparison.Ordinal))
+            {
+                _language.Value = normalized;
+            }
+        }
+
+        internal static void SelectLanguage(int index)
+        {
+            if (_language != null)
+            {
+                _language.Value = index == 1 ? SimplifiedChineseCode : EnglishCode;
+            }
+        }
+
+        internal static string Text(string key)
+        {
+            string value;
+            Dictionary<string, string> selected = IsSimplifiedChinese
+                ? SimplifiedChinese
+                : English;
+            if (selected.TryGetValue(key, out value))
+            {
+                return value;
+            }
+
+            return English.TryGetValue(key, out value) ? value : key;
+        }
+
+        internal static string Format(string key, params object[] arguments)
+        {
+            return string.Format(Text(key), arguments);
+        }
+
+        internal static string LocalizeDynamic(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return value;
+            }
+
+            string key;
+            if (KeyByEnglish.TryGetValue(value, out key) ||
+                KeyBySimplifiedChinese.TryGetValue(value, out key))
+            {
+                return Text(key);
+            }
+
+            string payload;
+            if (TryExtract(value, "已锁定 ", "。", out payload) ||
+                TryExtract(value, "Focused on ", ".", out payload))
+            {
+                return Format("LockedFormat", LocalizeFocusName(payload));
+            }
+
+            if (TryExtract(value, "目标已丢失: ", string.Empty, out payload) ||
+                TryExtract(value, "Focus target lost: ", string.Empty, out payload))
+            {
+                return Format("TargetLostFormat", LocalizeFocusName(payload));
+            }
+
+            if (TryExtract(
+                    value,
+                    "游戏 UI 已隐藏；按 ",
+                    " 可重新打开自由相机菜单。",
+                    out payload) ||
+                TryExtract(
+                    value,
+                    "Game UI hidden. Press ",
+                    " to reopen the free-camera menu.",
+                    out payload))
+            {
+                return Format("GameUiHiddenFormat", payload);
+            }
+
+            return LocalizeFocusName(value);
+        }
+
+        internal static string LocalizeFocusName(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return Text("None");
+            }
+
+            string key;
+            if (KeyByEnglish.TryGetValue(value, out key) ||
+                KeyBySimplifiedChinese.TryGetValue(value, out key))
+            {
+                return Text(key);
+            }
+
+            string payload;
+            if (TryExtract(value, "部件: ", string.Empty, out payload) ||
+                TryExtract(value, "part: ", string.Empty, out payload))
+            {
+                return Format("PartFormat", payload);
+            }
+
+            if (TryExtract(value, "导弹: ", string.Empty, out payload) ||
+                TryExtract(value, "missile: ", string.Empty, out payload))
+            {
+                return Format("MissileFormat", payload);
+            }
+
+            if (TryExtract(value, "炸弹: ", string.Empty, out payload) ||
+                TryExtract(value, "bomb: ", string.Empty, out payload))
+            {
+                return Format("BombFormat", payload);
+            }
+
+            return value;
+        }
+
+        private static string NormalizeLanguageCode(string value)
+        {
+            if (string.Equals(value, SimplifiedChineseCode, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(value, "Chinese", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(value, "zh-CN", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(value, "简体中文", StringComparison.Ordinal))
+            {
+                return SimplifiedChineseCode;
+            }
+
+            return EnglishCode;
+        }
+
+        private static Dictionary<string, string> CreateReverseMap(
+            Dictionary<string, string> source)
+        {
+            Dictionary<string, string> result =
+                new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (KeyValuePair<string, string> pair in source)
+            {
+                if (!result.ContainsKey(pair.Value))
+                {
+                    result.Add(pair.Value, pair.Key);
+                }
+            }
+
+            return result;
+        }
+
+        private static bool TryExtract(
+            string value,
+            string prefix,
+            string suffix,
+            out string payload)
+        {
+            payload = null;
+            if (!value.StartsWith(prefix, StringComparison.Ordinal) ||
+                !value.EndsWith(suffix, StringComparison.Ordinal) ||
+                value.Length < prefix.Length + suffix.Length)
+            {
+                return false;
+            }
+
+            payload = value.Substring(
+                prefix.Length,
+                value.Length - prefix.Length - suffix.Length);
+            return true;
+        }
+    }
+
+}
