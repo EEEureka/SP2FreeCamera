@@ -389,8 +389,16 @@ namespace SP2FreeCamera
             {
                 direction.Normalize();
                 float speed = _runtime.FastMode
-                    ? NumericUtility.ClampFinite(settings.FastSpeed.Value, 200f, 0.1f, 100000f)
-                    : NumericUtility.ClampFinite(settings.NormalSpeed.Value, 20f, 0.1f, 100000f);
+                    ? NumericUtility.ClampFinite(
+                        settings.FastSpeed.Value,
+                        Plugin.DefaultFastSpeed,
+                        0.1f,
+                        100000f)
+                    : NumericUtility.ClampFinite(
+                        settings.NormalSpeed.Value,
+                        Plugin.DefaultNormalSpeed,
+                        0.1f,
+                        100000f);
                 targetVelocity = direction * speed;
             }
 

@@ -12,9 +12,15 @@ namespace SP2FreeCamera
     {
         public const string PluginGuid = "local.sp2.freecamera";
         public const string PluginName = "SP2 Free Camera";
-        public const string PluginVersion = "0.6.4";
+        public const string PluginVersion = "0.6.5";
+
+        internal const float DefaultNormalSpeed = 200f;
+        internal const float DefaultFastSpeed = 2000f;
 
         private const int CurrentKeyBindingRevision = 2;
+        private const int CurrentMovementSpeedRevision = 1;
+        private const float LegacyNormalSpeed = 20f;
+        private const float LegacyFastSpeed = 200f;
 
         private Harmony _harmony;
         private FreeCameraRuntime _runtime;
@@ -86,6 +92,8 @@ namespace SP2FreeCamera
 
         private ConfigEntry<int> KeyBindingRevision { get; set; }
 
+        private ConfigEntry<int> MovementSpeedRevision { get; set; }
+
         private void Awake()
         {
             Log = Logger;
@@ -152,12 +160,12 @@ namespace SP2FreeCamera
             NormalSpeed = Config.Bind(
                 "Movement",
                 "NormalSpeed",
-                20f,
+                DefaultNormalSpeed,
                 Localization.Text("ConfigNormalSpeed"));
             FastSpeed = Config.Bind(
                 "Movement",
                 "FastSpeed",
-                200f,
+                DefaultFastSpeed,
                 Localization.Text("ConfigFastSpeed"));
             MovementSmoothingTime = Config.Bind(
                 "Movement",
@@ -264,7 +272,52 @@ namespace SP2FreeCamera
                 "KeyBindingRevision",
                 0,
                 Localization.Text("ConfigKeyRevision"));
+            MovementSpeedRevision = Config.Bind(
+                "Internal",
+                "MovementSpeedRevision",
+                0,
+                Localization.Text("ConfigMovementSpeedRevision"));
             MigrateLegacyKeyBindings();
+            MigrateLegacyMovementSpeeds();
+        }
+
+        private void MigrateLegacyMovementSpeeds()
+        {
+            if (MovementSpeedRevision.Value >= CurrentMovementSpeedRevision)
+            {
+                return;
+            }
+
+            bool changed = false;
+            bool saveOnConfigSet = Config.SaveOnConfigSet;
+            try
+            {
+                Config.SaveOnConfigSet = false;
+
+                if (NormalSpeed.Value == LegacyNormalSpeed)
+                {
+                    NormalSpeed.Value = DefaultNormalSpeed;
+                    changed = true;
+                }
+
+                if (FastSpeed.Value == LegacyFastSpeed)
+                {
+                    FastSpeed.Value = DefaultFastSpeed;
+                    changed = true;
+                }
+
+                MovementSpeedRevision.Value = CurrentMovementSpeedRevision;
+                Config.Save();
+            }
+            finally
+            {
+                Config.SaveOnConfigSet = saveOnConfigSet;
+            }
+
+            if (changed)
+            {
+                Logger.LogInfo("Migrated legacy free-camera movement speed defaults.");
+            }
         }
 
         private void MigrateLegacyKeyBindings()

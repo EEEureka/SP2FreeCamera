@@ -140,8 +140,8 @@ namespace SP2FreeCamera
                 { "BombFormat", "bomb: {0}" },
                 { "ConfigLanguage", "Interface language. Supported values: English and SimplifiedChinese." },
                 { "ConfigEnabled", "Whether free camera can be enabled. The ScrollLock menu can always be opened." },
-                { "ConfigNormalSpeed", "Normal movement speed in metres per second." },
-                { "ConfigFastSpeed", "Fast movement speed in metres per second." },
+                { "ConfigNormalSpeed", "Normal movement speed in metres per second. Default: 200." },
+                { "ConfigFastSpeed", "Fast movement speed in metres per second. Default: 2000." },
                 { "ConfigMovementSmoothing", "Smoothing time for camera movement velocity. Set to 0 for immediate acceleration and stopping." },
                 { "ConfigLookSensitivity", "Base rotation angle per pixel while dragging with the left mouse button at 60-degree FOV." },
                 { "ConfigLookSmoothing", "Smoothing time while left-drag look follows its target angle. Set to 0 for immediate rotation." },
@@ -169,7 +169,8 @@ namespace SP2FreeCamera
                 { "ConfigToggleSpeed", "Toggle normal and fast movement speed." },
                 { "ConfigLockSelf", "Focus the free camera on the local player's current aircraft or avatar." },
                 { "ConfigFocusSelectedTarget", "Focus the free camera on the game target currently selected by the local player's targeting system." },
-                { "ConfigKeyRevision", "Internal key-binding migration revision. Do not edit manually." }
+                { "ConfigKeyRevision", "Internal key-binding migration revision. Do not edit manually." },
+                { "ConfigMovementSpeedRevision", "Internal movement-speed migration revision. Do not edit manually." }
             };
 
         private static readonly Dictionary<string, string> SimplifiedChinese =
@@ -303,8 +304,8 @@ namespace SP2FreeCamera
                 { "BombFormat", "炸弹: {0}" },
                 { "ConfigLanguage", "界面语言。支持 English 和 SimplifiedChinese。" },
                 { "ConfigEnabled", "是否允许启用自由相机。ScrollLock 菜单始终可以打开。" },
-                { "ConfigNormalSpeed", "普通移动速度，单位为米/秒。" },
-                { "ConfigFastSpeed", "快速移动速度，单位为米/秒。" },
+                { "ConfigNormalSpeed", "普通移动速度，单位为米/秒。默认值：200。" },
+                { "ConfigFastSpeed", "快速移动速度，单位为米/秒。默认值：2000。" },
                 { "ConfigMovementSmoothing", "相机移动速度的平滑时间。设为 0 时立即加速和停止。" },
                 { "ConfigLookSensitivity", "60 度 FOV 下按住鼠标左键拖拽时，每像素旋转的基准角度。" },
                 { "ConfigLookSmoothing", "左键自由观察追随目标角度的平滑时间。设为 0 时立即旋转。" },
@@ -332,7 +333,8 @@ namespace SP2FreeCamera
                 { "ConfigToggleSpeed", "切换普通与快速移动速度。" },
                 { "ConfigLockSelf", "将自由相机锁定到本地玩家当前载具或角色。" },
                 { "ConfigFocusSelectedTarget", "将自由相机锁定到本地玩家目标系统当前选中的游戏目标。" },
-                { "ConfigKeyRevision", "内部键位迁移版本。请勿手动修改。" }
+                { "ConfigKeyRevision", "内部键位迁移版本。请勿手动修改。" },
+                { "ConfigMovementSpeedRevision", "内部移动速度迁移版本。请勿手动修改。" }
             };
 
         private static readonly Dictionary<string, string> KeyByEnglish = CreateReverseMap(English);
