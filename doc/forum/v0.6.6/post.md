@@ -65,19 +65,17 @@ With the game HUD hidden, the free camera can be positioned for cleaner screensh
 
 ## Default Controls
 
-| Action | Default input |
-| --- | --- |
-| Enter or exit free camera | `Insert` |
-| Open or close the full settings menu | `ScrollLock` |
-| Move forward or backward | `W` / `S` |
-| Move left or right | `A` / `D` |
-| Move up or down | `E` / `Q` |
-| Toggle normal and fast movement speed | `Keypad5` |
-| Focus on your own vehicle or avatar | `Backspace` |
-| Focus on the target selected by the game | `-` on the main keyboard number row |
-| Focus on an object under the pointer | Middle mouse button |
-| Clear focus and look freely | Hold and drag the left mouse button |
-| Adjust field of view | Mouse wheel |
+- Enter or exit free camera: `Insert`
+- Open or close the full settings menu: `ScrollLock`
+- Move forward or backward: `W` / `S`
+- Move left or right: `A` / `D`
+- Move up or down: `E` / `Q`
+- Toggle normal and fast movement speed: `Keypad5`
+- Focus on your own vehicle or avatar: `Backspace`
+- Focus on the target selected by the game: `-` on the main keyboard number row
+- Focus on an object under the pointer: Middle mouse button
+- Clear focus and look freely: Hold and drag the left mouse button
+- Adjust field of view: Mouse wheel
 
 The default movement speeds are:
 
