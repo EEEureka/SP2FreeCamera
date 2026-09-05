@@ -1,12 +1,12 @@
-# [Plugin Release][Windows] SP2 Free Camera v0.6.7 — Cinematic Position Movement and Per-Frame Target Lock
-
-![SP2 Free Camera demonstration](https://raw.githubusercontent.com/EEEureka/SP2FreeCamera/5826edd1d8db51b0a2b8b8433f7c30c19cae4400/doc/forum/v0.6.5/assets/01-cinematic-overview.png)
+# [Plugin Release][Windows] SP2 Free Camera — Cinematic Position Movement and Per-Frame Target Lock
 
 I made a local free-camera plugin for **SimplePlanes 2** called **SP2 Free Camera**.
 
 It is designed for observation, target tracking, screenshots, and video capture. In addition to six-axis movement, mouse look, and FOV control, it can focus on your own vehicle, the target selected by the game, aircraft parts, released weapons, and supported moving ground targets.
 
-Version **v0.6.7** adds separate position acceleration settings for normal and fast movement. Starting, braking and changing travel direction now follow the active mode's acceleration, giving you more control over smooth dolly moves and gliding shots. Camera rotation, dynamic target focus and FOV zoom remain independent.
+![SP2 Free Camera](https://raw.githubusercontent.com/EEEureka/SP2FreeCamera/5826edd1d8db51b0a2b8b8433f7c30c19cae4400/doc/forum/v0.6.5/assets/01-cinematic-overview.png)
+
+The plugin provides separate position acceleration settings for normal and fast movement. Starting, braking and changing travel direction follow the active mode's acceleration, giving you more control over smooth dolly moves and gliding shots. Camera rotation, dynamic target focus and FOV zoom remain independent.
 
 **Public source repository:** [github.com/EEEureka/SP2FreeCamera](https://github.com/EEEureka/SP2FreeCamera)
 
@@ -25,11 +25,9 @@ The shared **Movement smoothing time** setting (default `0.08 s`) softens the fi
 
 Setting one mode's acceleration to `0` disables its acceleration limit. Set that mode's acceleration and movement smoothing to `0` for instant movement. None of these position settings smooth the target's aiming direction or change the FOV smoothing setting.
 
-The demonstration media below was recorded with v0.6.5 and illustrates framing and target focus. It is not a demonstration of the new acceleration settings.
-
 ## Moving-Target Focus
 
-This HUD-free clip shows the camera keeping a fast-moving aircraft in view through a dive and turn. The focus system continuously updates the view direction without automatically translating the camera.
+The plugin supports moving-target focus on every rendered frame, updating the view direction without automatically translating the camera.
 
 ![Per-render-frame moving-target focus](https://raw.githubusercontent.com/EEEureka/SP2FreeCamera/5826edd1d8db51b0a2b8b8433f7c30c19cae4400/doc/forum/v0.6.5/assets/02-dynamic-lock.gif)
 
@@ -50,15 +48,15 @@ The mouse wheel adjusts the field of view using the menu's **FOV smoothing time*
 
 Set **FOV smoothing time** to `0` if you prefer instant zoom. The default is `0.12 s`.
 
-## Close Pass from a Fixed Camera Position
+## Fixed-Position Target Tracking
 
-In this clip, the target approaches the observation point and grows visibly larger while remaining near the center of the frame. This makes the rotation-only focus behavior easier to see: the camera does not travel alongside the target.
+Once movement has stopped, the plugin keeps the camera's position fixed while rotating the view to follow the target.
 
 ![Target approaching a fixed camera position](https://raw.githubusercontent.com/EEEureka/SP2FreeCamera/5826edd1d8db51b0a2b8b8433f7c30c19cae4400/doc/forum/v0.6.5/assets/03-close-follow.gif)
 
 ## Free Framing and Video Capture
 
-With the game HUD hidden, the free camera can be positioned for cleaner screenshots and cinematic footage.
+The plugin supports free camera positioning for screenshots and cinematic video capture.
 
 ![Cinematic free-camera capture](https://raw.githubusercontent.com/EEEureka/SP2FreeCamera/5826edd1d8db51b0a2b8b8433f7c30c19cae4400/doc/forum/v0.6.5/assets/04-cinematic-capture.gif)
 
@@ -68,12 +66,12 @@ With the game HUD hidden, the free camera can be positioned for cleaner screensh
 
 ## Focus Controls
 
-![In-game notification after focusing on a released missile](https://raw.githubusercontent.com/EEEureka/SP2FreeCamera/5826edd1d8db51b0a2b8b8433f7c30c19cae4400/doc/forum/v0.6.5/assets/07-focus-notification.png)
-
 - `Backspace`: focus on your current vehicle, or your avatar after leaving the vehicle;
 - `-` on the main keyboard number row: focus on the target currently selected by the game's targeting system;
 - middle mouse button: focus on terrain, an aircraft part, a supported moving ground target, or a released missile/bomb under the pointer;
 - left-mouse drag: clear the current focus and look freely.
+
+![Released-weapon focus](https://raw.githubusercontent.com/EEEureka/SP2FreeCamera/5826edd1d8db51b0a2b8b8433f7c30c19cae4400/doc/forum/v0.6.5/assets/07-focus-notification.png)
 
 ## Default Controls
 
@@ -100,25 +98,21 @@ The plugin includes English and Simplified Chinese interfaces. Movement speed, n
 
 ## Download
 
-- **Ready-to-install package:** [SP2FreeCamera-v0.6.7-win-x64.zip](https://github.com/EEEureka/SP2FreeCamera/releases/download/v0.6.7/SP2FreeCamera-v0.6.7-win-x64.zip)
-- **Release page:** [SP2 Free Camera v0.6.7](https://github.com/EEEureka/SP2FreeCamera/releases/tag/v0.6.7)
+- **Ready-to-install package:** [Download from the latest release](https://github.com/EEEureka/SP2FreeCamera/releases/latest) — choose the Windows x64 ZIP under **Assets**, not GitHub's automatically generated source-code archives.
+- **Release notes:** [Latest release](https://github.com/EEEureka/SP2FreeCamera/releases/latest)
 - **Public source repository:** [EEEureka/SP2FreeCamera](https://github.com/EEEureka/SP2FreeCamera)
 - **English documentation:** [README.md](https://github.com/EEEureka/SP2FreeCamera/blob/main/README.md)
 - **Simplified Chinese documentation:** [README.zh-CN.md](https://github.com/EEEureka/SP2FreeCamera/blob/main/doc/README.zh-CN.md)
-- **Checksum file:** [SHA256SUMS.txt](https://github.com/EEEureka/SP2FreeCamera/releases/download/v0.6.7/SHA256SUMS.txt)
+- **Checksum file:** [Latest SHA256SUMS.txt](https://github.com/EEEureka/SP2FreeCamera/releases/latest/download/SHA256SUMS.txt)
 
-SHA-256 of the ready-to-install package:
-
-```text
-468b5d679c5278a77c5962482a591bde511afbd0c9fed188d93c0eaf66eb0f40
-```
+These release links automatically follow the latest published release. To verify a download, compare its SHA-256 with the checksum file from the same release as the ZIP.
 
 ## Deployment / Installation
 
-The package already contains **BepInEx 5.4.23.5 for Windows x64**, so a separate BepInEx installation is not required.
+The package already contains **BepInEx for Windows x64**, so a separate BepInEx installation is not required.
 
 1. Close `SimplePlanes 2` completely.
-2. Download `SP2FreeCamera-v0.6.7-win-x64.zip` from the link above.
+2. Download the ready-to-install Windows x64 ZIP from the [latest release](https://github.com/EEEureka/SP2FreeCamera/releases/latest).
 3. Locate the game directory containing `SimplePlanes 2.exe`.
 4. Extract **all files and folders** from the archive directly into that game directory.
 5. If Windows asks whether to merge the existing `BepInEx` folder, allow it.
@@ -149,7 +143,7 @@ BepInEx/config/local.sp2.freecamera.cfg
 
 If an older configuration has `FovSmoothingTime = 0`, choose a non-zero **FOV smoothing time** in the menu to enable gradual zoom. Moving-target rotation remains immediate and independent of that value.
 
-When upgrading from an older version, the plugin migrates speed values only if they are still exactly equal to the old `20/200 m/s` defaults. Other custom speed values are preserved.
+Before upgrading, check the [latest release notes](https://github.com/EEEureka/SP2FreeCamera/releases/latest) for any configuration migration or compatibility guidance.
 
 ## Uninstallation
 
@@ -170,12 +164,12 @@ Do not remove the entire `BepInEx` folder, `winhttp.dll`, or `doorstop_config.in
 - The release package does not include personal configuration, runtime logs, caches, account information, access tokens, or developer-machine paths.
 - Target names are displayed only in the local UI; the plugin writes generic messages without target names to the BepInEx log.
 
-Player names visible in the demonstration media come from the in-game UI. Before sharing your own `BepInEx/LogOutput.log`, you should still review content written by the game or other plugins.
+Before sharing your own `BepInEx/LogOutput.log`, review content written by the game or other plugins.
 
 ## Current Limitations
 
 - Only non-VR flight scenes on Windows x64 are currently supported.
-- This release was built for game version `0.7.6.100f`; compatibility should be rechecked after game updates.
+- Check the [latest release notes](https://github.com/EEEureka/SP2FreeCamera/releases/latest) and [current documentation](https://github.com/EEEureka/SP2FreeCamera/blob/main/README.md) for game-version compatibility; compatibility should be rechecked after game updates.
 - The minimum FOV is `0.1°`.
 - If the target's original Transform is updated only on physics ticks, aiming on every rendered frame can use only the latest raw position available to that frame.
 - The source repository is public, but SP2 Free Camera does not currently declare an open-source license. Please contact the author before modifying or redistributing the source.
