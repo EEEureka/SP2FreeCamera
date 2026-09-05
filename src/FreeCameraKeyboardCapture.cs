@@ -8,9 +8,9 @@ using UnityEngine;
 namespace SP2FreeCamera
 {
     /// <summary>
-    /// Temporarily owns the unmodified free-camera movement keys (WASDQE by default)
-    /// that can also move the local craft or character. Controller maps themselves
-    /// are never disabled.
+    /// Temporarily owns unmodified camera keys (movement and the auto-FOV toggle)
+    /// that can also control the local craft or character. Controller maps
+    /// themselves are never disabled.
     /// </summary>
     internal sealed class FreeCameraKeyboardCapture : IDisposable
     {

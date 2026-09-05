@@ -1,4 +1,4 @@
-# [Plugin Release][Windows] SP2 Free Camera — Cinematic Position Movement and Per-Frame Target Lock
+# [Plugin Release][Windows] SP2 Free Camera — Cinematic Movement, Target Lock and Automatic FOV
 
 I made a local free-camera plugin for **SimplePlanes 2** called **SP2 Free Camera**.
 
@@ -44,9 +44,19 @@ The menu's **Terrain focus smoothing time** setting applies only to static focus
 
 ## Smooth FOV Zoom While Focused
 
-The mouse wheel adjusts the field of view using the menu's **FOV smoothing time**, whether the camera is in free look, focused on terrain, or locked to a moving object. This is separate from target rotation: a non-zero FOV smoothing value gives zoom a gradual visual transition without making the aim trail behind the target.
+Manual and automatic zoom use the menu's **FOV smoothing time**, whether the camera is in free look, focused on terrain, or locked to a moving object. This is separate from target rotation: a non-zero FOV smoothing value gives zoom a gradual visual transition without making the aim trail behind the target.
 
 Set **FOV smoothing time** to `0` if you prefer instant zoom. The default is `0.12 s`.
+
+## Automatic FOV and Reference-Area Lock
+
+The plugin supports automatic FOV compensation for changing target distance. Press `=` on the main keyboard, or use the toggle in either plugin menu. It works with every valid focus type, including terrain points, parts, your vehicle/avatar and selected game targets, without moving the camera.
+
+The mode uses a virtual unit sphere at the focus point as its mathematical reference, independently of the real target's size or shape. Initial framing is `100%`; while active, the mouse wheel changes the desired reference **area**. This percentage is relative to the captured framing, not a measurement of the real target's screen coverage.
+
+Automatic zoom uses the same **FOV smoothing time** as manual zoom. Nonzero smoothing allows temporary size drift during fast distance changes; set it to `0` for immediate compensation. FOV and near-distance limits are handled silently.
+
+Without a valid target, the mode waits and wheel zoom stays manual. Left-mouse dragging clears focus but keeps the switch armed. Turning the mode off preserves the current FOV, and selecting a new target captures a fresh framing baseline. The switch starts off when the game launches.
 
 ## Fixed-Position Target Tracking
 
@@ -83,16 +93,17 @@ The plugin supports free camera positioning for screenshots and cinematic video 
 - Toggle normal and fast movement speed: `Keypad5`
 - Focus on your own vehicle or avatar: `Backspace`
 - Focus on the target selected by the game: `-` on the main keyboard number row
+- Toggle automatic FOV: `=` on the main keyboard number row
 - Focus on an object under the pointer: Middle mouse button
 - Clear focus and look freely: Hold and drag the left mouse button
-- Adjust field of view: Mouse wheel
+- Adjust FOV, or desired reference area while automatic FOV is active: Mouse wheel
 
 The default movement speeds are:
 
 - normal mode: `200 m/s`;
 - fast mode: `2000 m/s`.
 
-While free camera is active, unmodified `W / A / S / D / Q / E` input is reserved for camera movement and temporarily blocked from the vehicle and avatar keyboard mappings. This prevents the camera and vehicle from responding at the same time. Mouse, controller, and right-mouse vehicle controls are not affected by this rule.
+While free camera is active, movement keys (`W / A / S / D / Q / E` by default) and the automatic-FOV key (`=` by default) are temporarily blocked from the vehicle and avatar keyboard mappings. This prevents camera controls from also operating the vehicle. Mouse, controller, and right-mouse vehicle controls are not affected by this rule.
 
 The plugin includes English and Simplified Chinese interfaces. Movement speed, normal/fast position acceleration, movement smoothing, look sensitivity, FOV, FOV smoothing, terrain-focus smoothing, UI settings, and key bindings can be changed from the settings menu.
 

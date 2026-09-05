@@ -346,6 +346,14 @@ namespace SP2FreeCamera
                     Localization.LocalizeFocusName(_runtime.FocusTargetName),
                 _statusStyle,
                 GUILayout.Width(contentWidth));
+            GUILayout.Label(_runtime.AutoFovStatusText, _statusStyle, GUILayout.Width(contentWidth));
+            if (GUILayout.Button(
+                Localization.Text(_runtime.AutoFovEnabled ? "DisableAutoFov" : "EnableAutoFov"),
+                _buttonStyle,
+                GUILayout.Width(contentWidth)))
+            {
+                _runtime.SetAutoFovEnabled(!_runtime.AutoFovEnabled);
+            }
 
             GUILayout.BeginHorizontal(GUILayout.Width(contentWidth));
             if (GUILayout.Button(

@@ -19,9 +19,10 @@ Default controls:
 - Normal movement speed: 200 m/s; fast movement speed: 2000 m/s
 - Backspace: focus on your current vehicle or avatar
 - Main keyboard minus: focus on the target selected by the game
+- Main keyboard equals (=): toggle automatic FOV
 - Middle mouse button: focus on terrain, a part, or a moving object under the pointer
 - Hold and drag the left mouse button: clear focus and look freely
-- Mouse wheel: adjust field of view
+- Mouse wheel: adjust field of view, or desired reference area while automatic FOV is active
 
 Position movement:
 - In the full menu, set Normal/Fast position acceleration (m/s²), then Apply values.
@@ -33,8 +34,20 @@ Position movement:
 - Example slow shot: normal speed 20 m/s, normal acceleration 20 m/s², smoothing 0.15 s.
 - Only position velocity is affected; rotation, focus and FOV remain independent.
 
-Moving targets use immediate per-render-frame rotation. Mouse-wheel zoom remains
-independent and uses the configured FOV smoothing time even while focused.
+Moving targets use immediate per-render-frame rotation. Manual and automatic FOV
+remain independent of rotation and use the configured FOV smoothing time.
+
+Automatic FOV:
+- Press main-keyboard = or use either plugin menu to toggle the mode.
+- Any valid focus point is supported: terrain, parts, moving targets, yourself or a game target.
+- Tracks the projected area of a virtual unit sphere, not the real target's size or shape.
+- Initial framing is 100%; the wheel changes the desired reference area while active.
+- Uses the existing FOV smoothing time. Nonzero smoothing allows temporary size drift.
+- No valid target: waiting; the wheel adjusts FOV manually. Left-drag clears focus.
+- Turning the mode off keeps the currently displayed FOV and restores manual zoom.
+- New targets get a new framing baseline. FOV/near-distance limits are silent.
+- The switch starts off on game launch and is not saved to configuration.
+- Key configuration: [Keys] ToggleAutoFov = Equals (not KeypadPlus).
 
 Uninstallation:
 Delete BepInEx\plugins\SP2FreeCamera.dll. Do not remove BepInEx, winhttp.dll,

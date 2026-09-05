@@ -13,7 +13,7 @@ namespace SP2FreeCamera
 {
     internal sealed class FreeCameraController : CameraController
     {
-        internal const float MinimumFov = 0.1f;
+        internal const float MinimumFov = FovMath.MinimumFov;
 
         private const float LostTargetGraceSeconds = 0.2f;
         private const float TargetJumpResetDistance = 100f;
@@ -29,6 +29,7 @@ namespace SP2FreeCamera
         private const float SampleVelocityEpsilonSquared = 0.000001f;
 
         private readonly FreeCameraRuntime _runtime;
+        private readonly AutoFovState _autoFov = new AutoFovState();
 
         private FocusTarget _focusTarget;
         private Vector3d _lastFocusGlobalPosition;
@@ -43,7 +44,7 @@ namespace SP2FreeCamera
         private bool _hasFocusTrackingState;
         private int _focusMotionSourceId;
         private bool _focusTrackingSuspended;
-        private int _lastFocusTrackingFrame = -1;
+        private int _lastCameraRenderFrame = -1;
         private float _lostTargetElapsed;
         private float _yaw;
         private float _pitch;
@@ -55,6 +56,7 @@ namespace SP2FreeCamera
         private Vector3 _smoothedMoveVelocity;
         private float _currentFov;
         private float _targetFov;
+        private float _pendingFovScroll;
         private bool _customProjectionActive;
         private bool _leftPressAccepted;
         private bool _leftDragging;
@@ -68,6 +70,7 @@ namespace SP2FreeCamera
             : base(cameraManager)
         {
             _runtime = runtime;
+            _autoFov.SetEnabled(runtime.AutoFovEnabled);
             _currentFov = initialFov;
             _targetFov = initialFov;
             Name = Localization.Text("FreeCamera");
@@ -92,6 +95,41 @@ namespace SP2FreeCamera
         internal float TargetFov
         {
             get { return _targetFov; }
+        }
+
+        internal bool AutoFovActive
+        {
+            get { return _autoFov.Active; }
+        }
+
+        internal double AutoFovAreaRatio
+        {
+            get { return _autoFov.AreaRatio; }
+        }
+
+        internal void SetAutoFovEnabled(bool enabled)
+        {
+            if (_autoFov.Enabled == enabled)
+            {
+                return;
+            }
+
+            // Never return to an old manual zoom value on handoff. Toggling an
+            // armed mode without a target must not interrupt manual zoom either.
+            if (_autoFov.Active || (enabled && _focusTarget != null))
+            {
+                _targetFov = _currentFov;
+            }
+            _autoFov.SetEnabled(enabled);
+        }
+
+        private void ResetAutoFovReference()
+        {
+            if (_autoFov.Enabled)
+            {
+                _targetFov = _currentFov;
+            }
+            _autoFov.ResetTarget();
         }
 
         internal void ProcessFrame(float unscaledDeltaTime)
@@ -124,7 +162,6 @@ namespace SP2FreeCamera
             }
 
             UpdateSmoothedLook(unscaledDeltaTime);
-            UpdateSmoothedFov(unscaledDeltaTime);
             UpdateUnlockedFocalPosition();
         }
 
@@ -147,6 +184,7 @@ namespace SP2FreeCamera
             }
 
             _focusTarget = focusTarget;
+            ResetAutoFovReference();
             _lastFocusGlobalPosition = focusGlobalPosition;
             _hasLastFocusGlobalPosition = true;
             ResetFocusTrackingState();
@@ -168,6 +206,7 @@ namespace SP2FreeCamera
             }
 
             _focusTarget = null;
+            ResetAutoFovReference();
             _hasLastFocusGlobalPosition = false;
             ResetFocusTrackingState();
             _lostTargetElapsed = 0f;
@@ -202,6 +241,7 @@ namespace SP2FreeCamera
         internal void ResetInputSmoothing()
         {
             _smoothedMoveVelocity = Vector3.zero;
+            _pendingFovScroll = 0f;
             ResetPointerState();
             CancelLookSmoothing();
         }
@@ -210,6 +250,8 @@ namespace SP2FreeCamera
         {
             base.OnSelected();
             IsActive = true;
+            _lastCameraRenderFrame = -1;
+            ResetAutoFovReference();
             _smoothedMoveVelocity = Vector3.zero;
             ResetFocusTrackingState();
             SyncLookAnglesFromCamera();
@@ -258,18 +300,35 @@ namespace SP2FreeCamera
         {
             MaintainCustomProjection();
 
-            if (!IsSelected || _focusTarget == null || CameraTransform == null)
+            if (!IsSelected || CameraManager == null || CameraTransform == null)
             {
                 return;
             }
 
             int frameCount = Time.frameCount;
-            if (_lastFocusTrackingFrame == frameCount)
+            if (_lastCameraRenderFrame == frameCount)
             {
                 UpdateFloatingOriginFocus();
                 return;
             }
-            _lastFocusTrackingFrame = frameCount;
+            _lastCameraRenderFrame = frameCount;
+
+            Vector3d focusGlobalPosition;
+            bool hasFreshFocus = UpdateFocusForRender(out focusGlobalPosition);
+            // Rotation and zoom share the SAME fresh pose after camera movement.
+            // The game also updates cameras on physics ticks: smooth FOV only
+            // here, once per rendered frame, never in Update(int frameCount).
+            UpdateFrameFov(Time.unscaledDeltaTime, hasFreshFocus, focusGlobalPosition);
+            MaintainCustomProjection();
+        }
+
+        private bool UpdateFocusForRender(out Vector3d resolvedGlobalPosition)
+        {
+            resolvedGlobalPosition = Vector3d.zero;
+            if (_focusTarget == null)
+            {
+                return false;
+            }
 
             Vector3 focusPosition;
             bool resolved = _focusTarget.TryGetFloatingOriginPosition(out focusPosition);
@@ -283,6 +342,7 @@ namespace SP2FreeCamera
                 else
                 {
                     _lastFocusGlobalPosition = focusGlobalPosition;
+                    resolvedGlobalPosition = focusGlobalPosition;
                     _hasLastFocusGlobalPosition = true;
                     _lostTargetElapsed = 0f;
 
@@ -296,7 +356,7 @@ namespace SP2FreeCamera
                         // Focus smoothing remains available only for fixed terrain points.
                         TrackImmediateDynamicPosition(focusGlobalPosition);
                     }
-                    return;
+                    return true;
                 }
             }
 
@@ -314,11 +374,12 @@ namespace SP2FreeCamera
                     ? _renderedFocusGlobalPosition
                     : _lastFocusGlobalPosition;
                 TrackImmediateGlobalPosition(frozenFocus);
-                return;
+                return false;
             }
 
             string lostName = _focusTarget.DisplayName;
             _focusTarget = null;
+            ResetAutoFovReference();
             _hasLastFocusGlobalPosition = false;
             ResetFocusTrackingState();
             _lostTargetElapsed = 0f;
@@ -327,6 +388,7 @@ namespace SP2FreeCamera
                 "目标已丢失: " + lostName,
                 true,
                 Localization.Text("FocusTargetLostLog"));
+            return false;
         }
 
         private void ProcessMovement(float unscaledDeltaTime, bool allowInput)
@@ -508,24 +570,12 @@ namespace SP2FreeCamera
             }
 
             float scroll = Input.mouseScrollDelta.y;
-            if (Mathf.Abs(scroll) > 0.0001f)
+            if (NumericUtility.IsFinite(scroll) && Mathf.Abs(scroll) > 0.0001f)
             {
-                float sensitivity = NumericUtility.ClampFinite(
-                    _runtime.Settings.FovScrollSensitivity.Value,
-                    1f,
-                    0.01f,
-                    10f);
-                float maximumFov = NumericUtility.ClampFinite(
-                    _runtime.Settings.MaximumFov.Value,
-                    120f,
-                    MinimumFov,
-                    179f);
-                float requestedFov = _targetFov * Mathf.Pow(0.9f, scroll * sensitivity);
-                _targetFov = NumericUtility.ClampFinite(
-                    requestedFov,
-                    _currentFov,
-                    MinimumFov,
-                    maximumFov);
+                // Resolve manual versus auto zoom only after this frame's focus
+                // sample is known. This also handles acquire/clear + scroll in
+                // the same frame without consuming wheel input twice.
+                _pendingFovScroll += scroll;
             }
         }
 
@@ -1500,10 +1550,56 @@ namespace SP2FreeCamera
             }
         }
 
+        private void UpdateFrameFov(
+            float unscaledDeltaTime, bool hasFreshFocus, Vector3d focusGlobalPosition)
+        {
+            float scroll = _pendingFovScroll;
+            _pendingFovScroll = 0f;
+            float maximumFov = NumericUtility.ClampFinite(
+                _runtime.Settings.MaximumFov.Value, 120f, MinimumFov, 179f);
+            float sensitivity = NumericUtility.ClampFinite(
+                _runtime.Settings.FovScrollSensitivity.Value, 1f, 0.01f, 10f);
+
+            double distance = double.NaN;
+            if (hasFreshFocus)
+            {
+                Vector3d relative = focusGlobalPosition - ToGlobalPosition(CameraTransform.position);
+                distance = Math.Sqrt(relative.x * relative.x +
+                    relative.y * relative.y + relative.z * relative.z);
+            }
+
+            Camera camera = CameraManager.MainCamera;
+            bool wasActive = _autoFov.Active;
+            double automaticTarget;
+            if (_autoFov.TryGetTargetFov(
+                distance, camera != null ? camera.aspect : double.NaN,
+                _currentFov, maximumFov, scroll, sensitivity, out automaticTarget))
+            {
+                _targetFov = (float)automaticTarget;
+            }
+            else
+            {
+                if (wasActive)
+                {
+                    // Freeze stale auto-zoom even during the lost-target grace
+                    // period, but keep the mode armed and allow manual scrolling.
+                    _targetFov = _currentFov;
+                }
+                if (NumericUtility.IsFinite(scroll) && Mathf.Abs(scroll) > 0.0001f)
+                {
+                    _targetFov = NumericUtility.ClampFinite(
+                        _targetFov * Mathf.Pow(0.9f, scroll * sensitivity),
+                        _currentFov, MinimumFov, maximumFov);
+                }
+            }
+
+            UpdateSmoothedFov(unscaledDeltaTime);
+        }
+
         private void UpdateSmoothedFov(float unscaledDeltaTime)
         {
             // FOV smoothing is independent of focus mode. Dynamic targets snap
-            // camera rotation, while scroll zoom always uses this menu setting.
+            // rotation; manual AND automatic zoom use this menu setting once.
             float maximumFov = NumericUtility.ClampFinite(
                 _runtime.Settings.MaximumFov.Value,
                 120f,
@@ -1525,28 +1621,8 @@ namespace SP2FreeCamera
                 Plugin.DefaultFovSmoothingTime,
                 0f,
                 2f);
-            if (smoothingTime <= 0.0001f)
-            {
-                SetAppliedFov(_targetFov);
-                return;
-            }
-
-            if (!NumericUtility.IsFinite(unscaledDeltaTime) || unscaledDeltaTime <= 0f)
-            {
-                return;
-            }
-
-            float currentLog = Mathf.Log(Mathf.Max(_currentFov, MinimumFov));
-            float targetLog = Mathf.Log(Mathf.Max(_targetFov, MinimumFov));
-            if (Mathf.Abs(targetLog - currentLog) <= 0.00005f)
-            {
-                SetAppliedFov(_targetFov);
-                return;
-            }
-
-            float blend = 1f - Mathf.Exp(-unscaledDeltaTime / smoothingTime);
-            float nextFov = Mathf.Exp(Mathf.Lerp(currentLog, targetLog, blend));
-            SetAppliedFov(nextFov);
+            SetAppliedFov((float)FovMath.Smooth(
+                _currentFov, _targetFov, smoothingTime, unscaledDeltaTime));
         }
 
         private void SetAppliedFov(float requestedFov)
@@ -1644,7 +1720,6 @@ namespace SP2FreeCamera
             _hasFocusTrackingState = false;
             _focusMotionSourceId = 0;
             _focusTrackingSuspended = false;
-            _lastFocusTrackingFrame = -1;
         }
 
         private void SyncLookAnglesFromCamera()

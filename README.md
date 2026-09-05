@@ -3,7 +3,7 @@
 # SP2 Free Camera
 
 `SP2 Free Camera` is a local free-camera plugin for the Windows x64 edition of
-`SimplePlanes 2`. The current version is `0.6.7`. It uses the BepInEx 5 Mono x64
+`SimplePlanes 2`. The current version is `0.6.8`. It uses the BepInEx 5 Mono x64
 runtime and is built for game version `0.7.6.100f`. The plugin only controls the
 local camera and local UI: it does not modify vehicle physics, send network
 messages, or depend on other custom plugins.
@@ -12,7 +12,7 @@ messages, or depend on other custom plugins.
 
 The `release` directory contains a ready-to-install archive:
 
-[`release/SP2FreeCamera-v0.6.7-win-x64.zip`](release/SP2FreeCamera-v0.6.7-win-x64.zip)
+[`release/SP2FreeCamera-v0.6.8-win-x64.zip`](release/SP2FreeCamera-v0.6.8-win-x64.zip)
 
 The archive includes both the Free Camera DLL and the complete BepInEx `5.4.23.5`
 Windows x64 runtime, so BepInEx does not need to be installed separately.
@@ -54,9 +54,10 @@ settings. The archive checksum is recorded in
 | Toggle normal and fast movement speed | `Keypad5` |
 | Focus on your current vehicle or avatar | `Backspace` |
 | Focus on the target selected by the game | `-` on the main keyboard number row |
+| Toggle automatic FOV | `=` on the main keyboard number row |
 | Focus on terrain, a part, or a moving object under the pointer | Middle mouse button |
 | Clear focus and look freely | Hold and drag the left mouse button |
-| Adjust field of view | Mouse wheel |
+| Adjust FOV, or desired reference area while automatic FOV is active | Mouse wheel |
 
 The default normal movement speed is `200 m/s`, and the default fast movement
 speed is `2000 m/s`. When upgrading from an older version, the plugin only
@@ -119,11 +120,46 @@ frame interruption longer than `0.25 s` still clears movement immediately.
   directly toward them.
 - Dynamic lock-on does not use target prediction or focus smoothing and never
   moves the camera position.
-- Mouse-wheel zoom remains independent of target focus and always uses the
-  configured FOV smoothing time.
+- Manual and automatic FOV remain independent of focus rotation and always use
+  the configured FOV smoothing time.
 - The menu's terrain-point lock smoothing setting only affects static focus
   points such as terrain.
 - Starting a left-button drag clears the active lock and returns to free look.
+
+## Automatic FOV / reference-area lock
+
+Press `=` on the main keyboard to toggle automatic FOV while free camera is
+enabled. The full settings menu and quick menu also provide a toggle and show
+**off**, **waiting for a target**, or **active**. Its configurable binding is
+`[Keys] ToggleAutoFov = Equals`, not `KeypadPlus`.
+
+With any valid focus target, the plugin compensates for distance changes using
+the projected area of a **virtual unit sphere** centered on the focus point.
+Terrain, parts, released weapons, dynamic ground targets, your vehicle/avatar,
+and selected game targets all use the same rule. No sphere is created or rendered,
+and the target's real dimensions, orientation, wing deployment and mesh shape
+are intentionally ignored. The camera's position is never changed by this mode.
+
+- Activation or a newly selected target captures the currently displayed FOV as
+  the initial framing (`100%`), avoiding a jump to a previous zoom value.
+- While active, the wheel changes desired reference **area** relative to that
+  initial framing. The displayed percentage is not the real target's screen
+  coverage. Wheel sensitivity uses the existing zoom sensitivity setting.
+- Ideal FOV is calculated once per rendered frame using the same fresh target
+  position as focus rotation. Actual FOV uses **FOV smoothing time** (default
+  `0.12 s`), exactly like manual zoom. Nonzero smoothing allows temporary framing
+  drift during fast distance changes; `0` applies the geometric result directly.
+- Without a valid target, the mode waits and the wheel adjusts FOV normally.
+  Left-mouse dragging clears focus and leaves the switch armed.
+- Disabling the mode keeps the currently displayed FOV and returns the wheel to
+  manual zoom. Lost targets stop stale auto-zoom; a new lock captures a new baseline.
+- FOV limits and distances on/inside the reference sphere are handled silently.
+  Distance-only clamping retains the desired ratio for recovery, and reverse
+  scrolling at a limit responds without accumulated out-of-range wheel input.
+
+The switch starts off when the plugin loads. It is retained across free-camera
+sessions until the game is closed, but is not saved to configuration. A practical
+[test checklist](doc/testing/auto-fov.md) covers the controls and boundary cases.
 
 ## Uninstallation
 
@@ -201,14 +237,17 @@ archive and verifies this pinned SHA-256 checksum:
 the plugin DLL version, and the absence of local user paths, repository paths,
 UNC paths, and private-network addresses.
 
-Run the position-movement regression tests without starting the game:
+Run the automatic-FOV and position-movement regression tests without starting the game:
 
 ```powershell
+.\test-auto-fov.ps1
 .\test-movement.ps1
 ```
 
-They cover acceleration, braking distance, turns, reversals, speed switches,
-smoothing combinations, and matching travel at different rendered-frame rates.
+The FOV tests cover unit-sphere projection, wheel ratios, state changes, silent
+limits, near-distance safety, viewport aspect changes, and shared zoom smoothing.
+Movement tests cover acceleration, braking distance, turns, reversals, speed
+switches, smoothing combinations, and travel at different rendered-frame rates.
 
 ## Current limitations
 

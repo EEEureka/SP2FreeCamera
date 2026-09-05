@@ -12,7 +12,7 @@ namespace SP2FreeCamera
     {
         public const string PluginGuid = "local.sp2.freecamera";
         public const string PluginName = "SP2 Free Camera";
-        public const string PluginVersion = "0.6.7";
+        public const string PluginVersion = "0.6.8";
 
         internal const float DefaultNormalSpeed = 200f;
         internal const float DefaultFastSpeed = 2000f;
@@ -97,6 +97,8 @@ namespace SP2FreeCamera
         internal ConfigEntry<KeyCode> LockSelfKey { get; private set; }
 
         internal ConfigEntry<KeyCode> FocusSelectedTargetKey { get; private set; }
+
+        internal ConfigEntry<KeyCode> ToggleAutoFovKey { get; private set; }
 
         private ConfigEntry<int> KeyBindingRevision { get; set; }
 
@@ -284,6 +286,10 @@ namespace SP2FreeCamera
                 "FocusSelectedTarget",
                 KeyCode.Minus,
                 Localization.Text("ConfigFocusSelectedTarget"));
+            ToggleAutoFovKey = BindKey(
+                "ToggleAutoFov",
+                KeyCode.Equals,
+                Localization.Text("ConfigToggleAutoFov"));
 
             KeyBindingRevision = Config.Bind(
                 "Internal",
@@ -444,7 +450,8 @@ namespace SP2FreeCamera
                 MoveDownKey,
                 ToggleSpeedKey,
                 LockSelfKey,
-                FocusSelectedTargetKey
+                FocusSelectedTargetKey,
+                ToggleAutoFovKey
             };
         }
 

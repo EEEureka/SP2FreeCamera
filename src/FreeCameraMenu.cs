@@ -99,6 +99,7 @@ namespace SP2FreeCamera
                 Localization.Text("FocusTarget") +
                     Localization.LocalizeFocusName(_runtime.FocusTargetName),
                 _labelStyle);
+            GUILayout.Label(_runtime.AutoFovStatusText, _statusStyle);
 
             GUILayout.BeginHorizontal(GUILayout.Width(contentWidth));
             if (GUILayout.Button(
@@ -173,6 +174,11 @@ namespace SP2FreeCamera
                 _settings.Enabled.Value,
                 Localization.Text("EnableFreeCamera"),
                 _toggleStyle);
+            _runtime.SetAutoFovEnabled(GUILayout.Toggle(
+                _runtime.AutoFovEnabled,
+                Localization.Text("AutoFovToggle"),
+                _toggleStyle));
+            GUILayout.Label(Localization.Text("AutoFovHelp"), _statusStyle);
             _settings.AutoHideUi.Value = GUILayout.Toggle(
                 _settings.AutoHideUi.Value,
                 Localization.Text("AutoHideUi"),
@@ -253,6 +259,7 @@ namespace SP2FreeCamera
             DrawKeyBinding(
                 Localization.Text("BindingFocusSelectedTarget"),
                 _settings.FocusSelectedTargetKey);
+            DrawKeyBinding(Localization.Text("BindingToggleAutoFov"), _settings.ToggleAutoFovKey);
 
             string duplicateWarning = FindDuplicateKeyWarning();
             if (!string.IsNullOrEmpty(duplicateWarning))
@@ -482,7 +489,8 @@ namespace SP2FreeCamera
                 _settings.MoveDownKey,
                 _settings.ToggleSpeedKey,
                 _settings.LockSelfKey,
-                _settings.FocusSelectedTargetKey
+                _settings.FocusSelectedTargetKey,
+                _settings.ToggleAutoFovKey
             };
         }
 

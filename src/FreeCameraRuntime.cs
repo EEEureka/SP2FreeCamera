@@ -31,6 +31,7 @@ namespace SP2FreeCamera
         private bool _active;
         private bool _controllerRegistered;
         private bool _fastMode;
+        private bool _autoFovEnabled;
         private bool _menuVisible;
         private bool _menuPointerCaptured;
         private bool _shuttingDown;
@@ -79,6 +80,29 @@ namespace SP2FreeCamera
         internal bool FastMode
         {
             get { return _fastMode; }
+        }
+
+        internal bool AutoFovEnabled
+        {
+            get { return _autoFovEnabled; }
+        }
+
+        internal string AutoFovStatusText
+        {
+            get
+            {
+                if (!_autoFovEnabled)
+                {
+                    return Localization.Text("AutoFovOff");
+                }
+                if (_freeCameraController == null || !_freeCameraController.AutoFovActive)
+                {
+                    return Localization.Text("AutoFovWaiting");
+                }
+                string percent = (_freeCameraController.AutoFovAreaRatio * 100).ToString(
+                    "G4", System.Globalization.CultureInfo.InvariantCulture);
+                return Localization.Format("AutoFovActiveFormat", percent);
+            }
         }
 
         internal bool MenuVisible
@@ -227,6 +251,12 @@ namespace SP2FreeCamera
             }
 
             bool canProcessKeyboardInput = CanProcessKeyboardInput();
+            KeyCode toggleAutoFovKey = _settings.ToggleAutoFovKey.Value;
+            if (toggleAutoFovKey != KeyCode.None && canProcessKeyboardInput &&
+                Input.GetKeyDown(toggleAutoFovKey))
+            {
+                SetAutoFovEnabled(!_autoFovEnabled);
+            }
             KeyCode lockSelfKey = _settings.LockSelfKey.Value;
             if (lockSelfKey != KeyCode.None && canProcessKeyboardInput &&
                 Input.GetKeyDown(lockSelfKey))
@@ -351,7 +381,8 @@ namespace SP2FreeCamera
                         _settings.MoveLeftKey.Value,
                         _settings.MoveRightKey.Value,
                         _settings.MoveUpKey.Value,
-                        _settings.MoveDownKey.Value);
+                        _settings.MoveDownKey.Value,
+                        _settings.ToggleAutoFovKey.Value);
                 }
 
                 if (_settings.AutoHideUi.Value)
@@ -392,6 +423,20 @@ namespace SP2FreeCamera
         {
             _fastMode = !_fastMode;
             Notify(_fastMode ? "已切换为快速移动。" : "已切换为普通移动。", false);
+        }
+
+        internal void SetAutoFovEnabled(bool enabled)
+        {
+            if (_autoFovEnabled == enabled)
+            {
+                return;
+            }
+            _autoFovEnabled = enabled;
+            if (_freeCameraController != null)
+            {
+                _freeCameraController.SetAutoFovEnabled(enabled);
+            }
+            Notify(Localization.Text(enabled ? "AutoFovEnabled" : "AutoFovDisabled"), false);
         }
 
         internal void ClearFocusTarget()
