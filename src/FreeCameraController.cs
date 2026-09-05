@@ -151,7 +151,8 @@ namespace SP2FreeCamera
             _hasLastFocusGlobalPosition = true;
             ResetFocusTrackingState();
             _lostTargetElapsed = 0f;
-            _smoothedMoveVelocity = Vector3.zero;
+            // Acquiring a focus target must not interrupt an ongoing dolly move.
+            // Position velocity continues through the same acceleration path.
             CancelLookSmoothing();
             _runtime.Notify(
                 "已锁定 " + focusTarget.DisplayName + "。",
@@ -384,11 +385,12 @@ namespace SP2FreeCamera
                 _runtime.ToggleFastMode();
             }
 
+            bool fastMode = _runtime.FastMode;
             Vector3 targetVelocity = Vector3.zero;
             if (direction.sqrMagnitude > 0.0001f)
             {
                 direction.Normalize();
-                float speed = _runtime.FastMode
+                float speed = fastMode
                     ? NumericUtility.ClampFinite(
                         settings.FastSpeed.Value,
                         Plugin.DefaultFastSpeed,
@@ -420,19 +422,33 @@ namespace SP2FreeCamera
                 0.08f,
                 0f,
                 2f);
-            if (smoothingTime <= 0.0001f)
-            {
-                _smoothedMoveVelocity = targetVelocity;
-                ApplyCameraDisplacement(targetVelocity * unscaledDeltaTime);
-                return;
-            }
-
-            float decay = Mathf.Exp(-unscaledDeltaTime / smoothingTime);
-            Vector3 velocityOffset = _smoothedMoveVelocity - targetVelocity;
+            // Use the active mode for both acceleration and braking. Switching
+            // modes preserves world velocity and only changes the requested rate.
+            float acceleration = fastMode
+                ? NumericUtility.ClampFinite(
+                    settings.FastAcceleration.Value,
+                    Plugin.DefaultFastAcceleration,
+                    0f,
+                    Plugin.MaximumMovementAcceleration)
+                : NumericUtility.ClampFinite(
+                    settings.NormalAcceleration.Value,
+                    Plugin.DefaultNormalAcceleration,
+                    0f,
+                    Plugin.MaximumMovementAcceleration);
+            Vector3 velocityDelta = targetVelocity - _smoothedMoveVelocity;
+            double velocityBlend;
+            double displacementBlendTime;
+            MovementIntegrator.Calculate(
+                velocityDelta.magnitude,
+                acceleration,
+                smoothingTime,
+                unscaledDeltaTime,
+                out velocityBlend,
+                out displacementBlendTime);
             Vector3 displacement =
-                targetVelocity * unscaledDeltaTime +
-                velocityOffset * smoothingTime * (1f - decay);
-            _smoothedMoveVelocity = targetVelocity + velocityOffset * decay;
+                _smoothedMoveVelocity * unscaledDeltaTime +
+                velocityDelta * (float)displacementBlendTime;
+            _smoothedMoveVelocity += velocityDelta * (float)velocityBlend;
 
             if (targetVelocity.sqrMagnitude <= 0.000001f &&
                 _smoothedMoveVelocity.sqrMagnitude <= 0.000001f)

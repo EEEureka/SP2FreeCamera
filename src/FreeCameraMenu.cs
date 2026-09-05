@@ -21,6 +21,8 @@ namespace SP2FreeCamera
 
         private string _normalSpeedInput;
         private string _fastSpeedInput;
+        private string _normalAccelerationInput;
+        private string _fastAccelerationInput;
         private string _movementSmoothingTimeInput;
         private string _lookSensitivityInput;
         private string _lookSmoothingTimeInput;
@@ -196,6 +198,9 @@ namespace SP2FreeCamera
             GUILayout.Label(Localization.Text("NumericSettings"), _sectionStyle);
             DrawNumericRow(Localization.Text("NormalSpeed"), ref _normalSpeedInput);
             DrawNumericRow(Localization.Text("FastSpeed"), ref _fastSpeedInput);
+            DrawNumericRow(Localization.Text("NormalAcceleration"), ref _normalAccelerationInput);
+            DrawNumericRow(Localization.Text("FastAcceleration"), ref _fastAccelerationInput);
+            GUILayout.Label(Localization.Text("MovementAccelerationHelp"), _statusStyle);
             DrawNumericRow(Localization.Text("MovementSmoothingTime"), ref _movementSmoothingTimeInput);
             DrawNumericRow(Localization.Text("LookSensitivity"), ref _lookSensitivityInput);
             DrawNumericRow(Localization.Text("LookSmoothingTime"), ref _lookSmoothingTimeInput);
@@ -372,6 +377,8 @@ namespace SP2FreeCamera
         {
             float normalSpeed;
             float fastSpeed;
+            float normalAcceleration;
+            float fastAcceleration;
             float movementSmoothingTime;
             float lookSensitivity;
             float lookSmoothingTime;
@@ -384,6 +391,8 @@ namespace SP2FreeCamera
 
             if (!TryParseFloat(_normalSpeedInput, out normalSpeed) ||
                 !TryParseFloat(_fastSpeedInput, out fastSpeed) ||
+                !TryParseFloat(_normalAccelerationInput, out normalAcceleration) ||
+                !TryParseFloat(_fastAccelerationInput, out fastAcceleration) ||
                 !TryParseFloat(_movementSmoothingTimeInput, out movementSmoothingTime) ||
                 !TryParseFloat(_lookSensitivityInput, out lookSensitivity) ||
                 !TryParseFloat(_lookSmoothingTimeInput, out lookSmoothingTime) ||
@@ -400,6 +409,10 @@ namespace SP2FreeCamera
 
             _settings.NormalSpeed.Value = Mathf.Clamp(normalSpeed, 0.1f, 100000f);
             _settings.FastSpeed.Value = Mathf.Clamp(fastSpeed, 0.1f, 100000f);
+            _settings.NormalAcceleration.Value = Mathf.Clamp(
+                normalAcceleration, 0f, Plugin.MaximumMovementAcceleration);
+            _settings.FastAcceleration.Value = Mathf.Clamp(
+                fastAcceleration, 0f, Plugin.MaximumMovementAcceleration);
             _settings.MovementSmoothingTime.Value = Mathf.Clamp(movementSmoothingTime, 0f, 2f);
             _settings.LookSensitivity.Value = Mathf.Clamp(lookSensitivity, 0.001f, 10f);
             _settings.LookSmoothingTime.Value = Mathf.Clamp(lookSmoothingTime, 0f, 1f);
@@ -417,6 +430,10 @@ namespace SP2FreeCamera
         {
             _normalSpeedInput = FormatNumber(_settings.NormalSpeed.Value);
             _fastSpeedInput = FormatNumber(_settings.FastSpeed.Value);
+            _normalAccelerationInput = _settings.NormalAcceleration.Value.ToString(
+                "G", CultureInfo.InvariantCulture);
+            _fastAccelerationInput = _settings.FastAcceleration.Value.ToString(
+                "G", CultureInfo.InvariantCulture);
             _movementSmoothingTimeInput = FormatNumber(_settings.MovementSmoothingTime.Value);
             _lookSensitivityInput = FormatNumber(_settings.LookSensitivity.Value);
             _lookSmoothingTimeInput = FormatNumber(_settings.LookSmoothingTime.Value);

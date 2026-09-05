@@ -23,6 +23,16 @@ Default controls:
 - Hold and drag the left mouse button: clear focus and look freely
 - Mouse wheel: adjust field of view
 
+Position movement:
+- In the full menu, set Normal/Fast position acceleration (m/s²), then Apply values.
+- Defaults: normal 80 m/s²; fast 800 m/s². Starts, braking and turns use the active mode.
+- Switching modes preserves velocity and uses the new mode's acceleration or braking rate.
+- Lower values give longer glides. Releasing movement input gradually brakes.
+- Movement smoothing (default 0.08 s) softens the final transition.
+- Acceleration 0 disables that mode's limit. Set its acceleration and smoothing to 0 for instant movement.
+- Example slow shot: normal speed 20 m/s, normal acceleration 20 m/s², smoothing 0.15 s.
+- Only position velocity is affected; rotation, focus and FOV remain independent.
+
 Moving targets use immediate per-render-frame rotation. Mouse-wheel zoom remains
 independent and uses the configured FOV smoothing time even while focused.
 

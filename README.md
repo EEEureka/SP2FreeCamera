@@ -3,7 +3,7 @@
 # SP2 Free Camera
 
 `SP2 Free Camera` is a local free-camera plugin for the Windows x64 edition of
-`SimplePlanes 2`. The current version is `0.6.6`. It uses the BepInEx 5 Mono x64
+`SimplePlanes 2`. The current version is `0.6.7`. It uses the BepInEx 5 Mono x64
 runtime and is built for game version `0.7.6.100f`. The plugin only controls the
 local camera and local UI: it does not modify vehicle physics, send network
 messages, or depend on other custom plugins.
@@ -12,7 +12,7 @@ messages, or depend on other custom plugins.
 
 The `release` directory contains a ready-to-install archive:
 
-[`release/SP2FreeCamera-v0.6.6-win-x64.zip`](release/SP2FreeCamera-v0.6.6-win-x64.zip)
+[`release/SP2FreeCamera-v0.6.7-win-x64.zip`](release/SP2FreeCamera-v0.6.7-win-x64.zip)
 
 The archive includes both the Free Camera DLL and the complete BepInEx `5.4.23.5`
 Windows x64 runtime, so BepInEx does not need to be installed separately.
@@ -71,6 +71,45 @@ BepInEx/config/local.sp2.freecamera.cfg
 
 The plugin includes English and Simplified Chinese interfaces. The language can
 be changed from either the quick menu or the full settings menu.
+
+## Cinematic position movement
+
+Open the full settings menu with `ScrollLock` (or the settings button in the
+quick menu). Under **Numeric settings**, edit **Normal position acceleration
+(m/s²)** and **Fast position acceleration (m/s²)** independently, then click
+**Apply values**. Defaults are `80 m/s²` for normal mode and `800 m/s²` for fast
+mode. Both support `0–1000000` and are saved as `[Movement] NormalAcceleration`
+and `FastAcceleration`.
+
+The active mode's acceleration limits how quickly the camera's position velocity
+can change when starting, releasing movement input or changing direction. A mode
+switch preserves the current velocity and immediately uses the new mode's rate,
+including braking when switching from fast to normal. Keyboard and quick-menu
+movement buttons use the same behavior. Velocity is retained in world space, so changing the view
+direction while moving produces a gradual turn in the travel path. Acquiring a
+focus target also preserves an ongoing move.
+
+**Movement smoothing time** remains a shared setting (default `0.08 s`). It
+eases the final approach to the requested speed or to a stop. With smoothing set
+to `0`, position movement still accelerates and brakes at the configured rate.
+Setting a mode's acceleration to `0` disables its limit and restores the previous
+smoothing-only behavior in that mode; set its acceleration and movement smoothing
+to `0` for instant movement.
+
+Lower acceleration gives gentler, longer glides. As a starting point for a slow
+shot, try a normal speed of `20 m/s`, normal acceleration of `20 m/s²`, and
+movement smoothing of `0.15 s`. With the default speeds and accelerations, both
+modes take at least `2.5 s` to accelerate from rest to their requested speed;
+easing extends the final transition. Switching from fast to normal uses the
+normal acceleration for deceleration, so it can take longer to slow down.
+Releasing movement input gradually brakes the camera, so allow room for the
+stopping distance.
+
+These settings affect position only. Mouse-look rotation, immediate dynamic
+target focus, and FOV zoom keep their independent settings. A focused camera may
+finish braking from your movement input, but the target itself never pulls its
+position. Opening the full menu, losing input focus, leaving free camera, or a
+frame interruption longer than `0.25 s` still clears movement immediately.
 
 ## Lock-on behavior
 
@@ -161,6 +200,15 @@ archive and verifies this pinned SHA-256 checksum:
 `verify-release.ps1` checks the archive allowlist, every bundled BepInEx file,
 the plugin DLL version, and the absence of local user paths, repository paths,
 UNC paths, and private-network addresses.
+
+Run the position-movement regression tests without starting the game:
+
+```powershell
+.\test-movement.ps1
+```
+
+They cover acceleration, braking distance, turns, reversals, speed switches,
+smoothing combinations, and matching travel at different rendered-frame rates.
 
 ## Current limitations
 

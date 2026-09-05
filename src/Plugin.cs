@@ -12,10 +12,13 @@ namespace SP2FreeCamera
     {
         public const string PluginGuid = "local.sp2.freecamera";
         public const string PluginName = "SP2 Free Camera";
-        public const string PluginVersion = "0.6.6";
+        public const string PluginVersion = "0.6.7";
 
         internal const float DefaultNormalSpeed = 200f;
         internal const float DefaultFastSpeed = 2000f;
+        internal const float DefaultNormalAcceleration = 80f;
+        internal const float DefaultFastAcceleration = 800f;
+        internal const float MaximumMovementAcceleration = 1000000f;
         internal const float DefaultFovSmoothingTime = 0.12f;
 
         private const int CurrentKeyBindingRevision = 2;
@@ -36,6 +39,10 @@ namespace SP2FreeCamera
         internal ConfigEntry<float> NormalSpeed { get; private set; }
 
         internal ConfigEntry<float> FastSpeed { get; private set; }
+
+        internal ConfigEntry<float> NormalAcceleration { get; private set; }
+
+        internal ConfigEntry<float> FastAcceleration { get; private set; }
 
         internal ConfigEntry<float> MovementSmoothingTime { get; private set; }
 
@@ -168,6 +175,16 @@ namespace SP2FreeCamera
                 "FastSpeed",
                 DefaultFastSpeed,
                 Localization.Text("ConfigFastSpeed"));
+            NormalAcceleration = Config.Bind(
+                "Movement",
+                "NormalAcceleration",
+                DefaultNormalAcceleration,
+                Localization.Text("ConfigNormalAcceleration"));
+            FastAcceleration = Config.Bind(
+                "Movement",
+                "FastAcceleration",
+                DefaultFastAcceleration,
+                Localization.Text("ConfigFastAcceleration"));
             MovementSmoothingTime = Config.Bind(
                 "Movement",
                 "SmoothingTime",
