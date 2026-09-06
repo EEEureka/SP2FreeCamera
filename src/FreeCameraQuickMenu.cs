@@ -92,7 +92,8 @@ namespace SP2FreeCamera
         {
             get
             {
-                if (!Expanded || !_runtime.Active || !Application.isFocused ||
+                if (!Expanded || !_runtime.Active || !_runtime.CinematicModeEnabled ||
+                    !Application.isFocused ||
                     !Input.GetMouseButton(0))
                 {
                     return Vector3.zero;
@@ -124,6 +125,11 @@ namespace SP2FreeCamera
             {
                 _expanded = false;
             }
+        }
+
+        internal void ResetMovementInput()
+        {
+            _movementAxes = Vector3.zero;
         }
 
         internal void Draw()
@@ -347,6 +353,14 @@ namespace SP2FreeCamera
                 _statusStyle,
                 GUILayout.Width(contentWidth));
             GUILayout.Label(_runtime.AutoFovStatusText, _statusStyle, GUILayout.Width(contentWidth));
+            GUILayout.Label(_runtime.CinematicModeStatusText, _statusStyle, GUILayout.Width(contentWidth));
+            if (GUILayout.Button(
+                Localization.Text(_runtime.CinematicModeEnabled ? "DisableCinematicMode" : "EnableCinematicMode"),
+                _buttonStyle,
+                GUILayout.Width(contentWidth)))
+            {
+                _runtime.SetCinematicModeEnabled(!_runtime.CinematicModeEnabled);
+            }
             if (GUILayout.Button(
                 Localization.Text(_runtime.AutoFovEnabled ? "DisableAutoFov" : "EnableAutoFov"),
                 _buttonStyle,
@@ -407,7 +421,7 @@ namespace SP2FreeCamera
 
             GUILayout.BeginHorizontal(GUILayout.Width(contentWidth));
             previousGuiEnabled = GUI.enabled;
-            GUI.enabled = previousGuiEnabled && _runtime.Active;
+            GUI.enabled = previousGuiEnabled && _runtime.Active && _runtime.CinematicModeEnabled;
             if (GUILayout.Button(
                 Localization.Text(_runtime.FastMode ? "SwitchNormalSpeed" : "SwitchFastSpeed"),
                 _buttonStyle,
@@ -438,7 +452,7 @@ namespace SP2FreeCamera
             GUILayout.Label(Localization.Text("HoldButtonsToMove"), _labelStyle);
             Vector3 nextMovement = Vector3.zero;
             previousGuiEnabled = GUI.enabled;
-            GUI.enabled = previousGuiEnabled && _runtime.Active;
+            GUI.enabled = previousGuiEnabled && _runtime.Active && _runtime.CinematicModeEnabled;
 
             GUILayout.BeginHorizontal(GUILayout.Width(contentWidth));
             if (GUILayout.RepeatButton(

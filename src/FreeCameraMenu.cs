@@ -100,6 +100,7 @@ namespace SP2FreeCamera
                     Localization.LocalizeFocusName(_runtime.FocusTargetName),
                 _labelStyle);
             GUILayout.Label(_runtime.AutoFovStatusText, _statusStyle);
+            GUILayout.Label(_runtime.CinematicModeStatusText, _statusStyle);
 
             GUILayout.BeginHorizontal(GUILayout.Width(contentWidth));
             if (GUILayout.Button(
@@ -174,6 +175,11 @@ namespace SP2FreeCamera
                 _settings.Enabled.Value,
                 Localization.Text("EnableFreeCamera"),
                 _toggleStyle);
+            _runtime.SetCinematicModeEnabled(GUILayout.Toggle(
+                _runtime.CinematicModeEnabled,
+                Localization.Text("CinematicModeToggle"),
+                _toggleStyle));
+            GUILayout.Label(Localization.Text("CinematicModeHelp"), _statusStyle);
             _runtime.SetAutoFovEnabled(GUILayout.Toggle(
                 _runtime.AutoFovEnabled,
                 Localization.Text("AutoFovToggle"),
@@ -248,6 +254,7 @@ namespace SP2FreeCamera
             GUILayout.Label(Localization.Text("BindingsHelp"), _statusStyle);
             DrawKeyBinding(Localization.Text("BindingToggleCamera"), _settings.ToggleCameraKey);
             DrawKeyBinding(Localization.Text("BindingToggleMenu"), _settings.ToggleMenuKey);
+            DrawKeyBinding(Localization.Text("BindingToggleCinematicMode"), _settings.ToggleCinematicModeKey);
             DrawKeyBinding(Localization.Text("BindingMoveForward"), _settings.MoveForwardKey);
             DrawKeyBinding(Localization.Text("BindingMoveBackward"), _settings.MoveBackwardKey);
             DrawKeyBinding(Localization.Text("BindingMoveLeft"), _settings.MoveLeftKey);
@@ -481,6 +488,7 @@ namespace SP2FreeCamera
             {
                 _settings.ToggleCameraKey,
                 _settings.ToggleMenuKey,
+                _settings.ToggleCinematicModeKey,
                 _settings.MoveForwardKey,
                 _settings.MoveBackwardKey,
                 _settings.MoveLeftKey,

@@ -12,14 +12,18 @@ The plugin provides separate position acceleration settings for normal and fast 
 
 ## Cinematic Position Movement
 
+Press **0 on the main keyboard** to switch between cinematic movement and general mode while free camera is active. Cinematic mode is enabled by default, and your choice is saved across game restarts. Both plugin menus also provide a toggle.
+
+In cinematic mode, `W/A/S/D/Q/E` and quick-menu buttons move the camera. General mode immediately stops camera movement and returns those keys to the game's vehicle/avatar controls, including Q/E yaw. Mouse look, target focus, manual FOV and automatic FOV remain available in either mode. Switching modes does not clear the target or reset zoom smoothing.
+
 Open the full settings menu with `ScrollLock`, or use the settings button in the quick menu. Under **Numeric settings**, edit the two independent inputs and click **Apply values**:
 
 - Normal position acceleration: `80 m/s²` by default.
 - Fast position acceleration: `800 m/s²` by default.
 
-These settings change how quickly the camera's **position velocity** changes. They apply to starting, releasing the movement keys, turning, reversing, and switching movement modes. The quick-menu direction buttons use the same movement behavior.
+These settings change how quickly the camera's **position velocity** changes in cinematic mode. They apply to starting, releasing the movement keys, turning, reversing, and switching normal/fast speed. The quick-menu direction buttons use the same movement behavior.
 
-Changing modes keeps the current velocity and applies the new mode's acceleration. Switching from fast to normal also uses the normal acceleration for braking, so slowing down from high speed can take longer. Acquiring a focus target preserves an ongoing move instead of stopping the camera suddenly.
+Changing normal/fast speed keeps the current velocity and applies the new speed setting's acceleration. Switching from fast to normal also uses the normal acceleration for braking, so slowing down from high speed can take longer. Acquiring a focus target preserves an ongoing move instead of stopping the camera suddenly. Switching to general mode instead stops movement immediately.
 
 The shared **Movement smoothing time** setting (default `0.08 s`) softens the final approach to the requested speed or a stop. Lower acceleration produces gentler, longer glides. For a slow shot, try normal speed `20 m/s`, normal acceleration `20 m/s²`, and movement smoothing `0.15 s`.
 
@@ -38,7 +42,7 @@ For aircraft parts, released missiles or bombs, supported moving ground targets,
 - does not predict the target's future position;
 - does not apply the menu's terrain-focus smoothing value;
 - keeps a settled camera position fixed; after releasing movement input, the camera finishes braking first;
-- lets you move the camera manually while continuing to face the target.
+- lets you move the camera manually in cinematic mode while continuing to face the target.
 
 The menu's **Terrain focus smoothing time** setting applies only to static focus points such as terrain. Starting a left-mouse drag clears the current focus and returns to free look.
 
@@ -87,6 +91,7 @@ The plugin supports free camera positioning for screenshots and cinematic video 
 
 - Enter or exit free camera: `Insert`
 - Open or close the full settings menu: `ScrollLock`
+- Toggle cinematic/general mode: `0` on the main keyboard number row (default on, saved locally)
 - Move forward or backward: `W` / `S`
 - Move left or right: `A` / `D`
 - Move up or down: `E` / `Q`
@@ -105,9 +110,9 @@ The default movement speeds are:
 - normal mode: `200 m/s`;
 - fast mode: `2000 m/s`.
 
-While free camera is active, movement keys (`W / A / S / D / Q / E` by default) and the automatic-FOV key (`=` by default) are temporarily blocked from the vehicle and avatar keyboard mappings. This prevents camera controls from also operating the vehicle. Mouse, controller, and right-mouse vehicle controls are not affected by this rule.
+Cinematic mode temporarily captures movement keys (`W / A / S / D / Q / E` by default) in the vehicle and avatar keyboard mappings; general mode returns them to their prior enabled states. The plugin's mode keys (`0` and `=` by default) remain captured until free camera exits. Other map categories, modified-key bindings, mouse, controller and right-mouse vehicle controls are unchanged.
 
-The plugin includes English and Simplified Chinese interfaces. Movement speed, normal/fast position acceleration, movement smoothing, look sensitivity, FOV, FOV smoothing, terrain-focus smoothing, UI settings, and key bindings can be changed from the settings menu.
+The plugin includes English and Simplified Chinese interfaces. Cinematic mode, movement speed, normal/fast position acceleration, movement smoothing, look sensitivity, FOV, FOV smoothing, terrain-focus smoothing and UI settings can be changed from the settings menu. Current key bindings are displayed there; rebinding uses the local configuration file, not an in-menu key editor.
 
 ## Download
 

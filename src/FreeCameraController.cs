@@ -246,6 +246,11 @@ namespace SP2FreeCamera
             CancelLookSmoothing();
         }
 
+        internal void ResetMovement()
+        {
+            _smoothedMoveVelocity = Vector3.zero;
+        }
+
         public override void OnSelected()
         {
             base.OnSelected();
@@ -393,9 +398,9 @@ namespace SP2FreeCamera
 
         private void ProcessMovement(float unscaledDeltaTime, bool allowInput)
         {
-            if (!allowInput)
+            if (!allowInput || !_runtime.CinematicModeEnabled)
             {
-                _smoothedMoveVelocity = Vector3.zero;
+                ResetMovement();
                 return;
             }
 

@@ -3,7 +3,7 @@
 # SP2 Free Camera
 
 `SP2 Free Camera` is a local free-camera plugin for the Windows x64 edition of
-`SimplePlanes 2`. The current version is `0.6.9`. It uses the BepInEx 5 Mono x64
+`SimplePlanes 2`. The current version is `0.6.10`. It uses the BepInEx 5 Mono x64
 runtime and is built for game version `0.7.6.100f`. The plugin only controls the
 local camera and local UI: it does not modify vehicle physics, send network
 messages, or depend on other custom plugins.
@@ -12,7 +12,7 @@ messages, or depend on other custom plugins.
 
 The `release` directory contains a ready-to-install archive:
 
-[`release/SP2FreeCamera-v0.6.9-win-x64.zip`](release/SP2FreeCamera-v0.6.9-win-x64.zip)
+[`release/SP2FreeCamera-v0.6.10-win-x64.zip`](release/SP2FreeCamera-v0.6.10-win-x64.zip)
 
 The archive includes both the Free Camera DLL and the complete BepInEx `5.4.23.5`
 Windows x64 runtime, so BepInEx does not need to be installed separately.
@@ -48,6 +48,7 @@ settings. The archive checksum is recorded in
 | --- | --- |
 | Enter or exit free camera | `Insert` |
 | Open or close the standalone settings menu | `ScrollLock` |
+| Toggle cinematic/general mode | `0` on the main keyboard number row |
 | Move forward or backward | `W` / `S` |
 | Move left or right | `A` / `D` |
 | Move up or down | `E` / `Q` |
@@ -86,6 +87,35 @@ dialogs, text fields and the developer console still retain their input.
 
 ## Cinematic position movement
 
+Press **0 on the main keyboard** (not Numpad 0) while free camera is active to
+switch between **cinematic mode** and **general mode**. Cinematic mode is enabled
+by default. The choice is saved locally as `[Movement] CinematicModeEnabled`
+and retained when re-entering free camera or restarting the game.
+
+- **Cinematic mode:** movement keys (`W/A/S/D/Q/E` by default) and quick-menu
+  direction buttons move the camera with the configured speed and acceleration.
+- **General mode:** the camera position stops immediately, with no residual
+  glide. Movement keys return to the game's vehicle/avatar controls, including
+  Q/E yaw with the default game bindings. Quick-menu movement and speed buttons
+  are disabled.
+- Mouse look, target focus, manual FOV and automatic FOV remain available in
+  both modes. Switching modes does not reset the target, interrupt a drag or
+  reset FOV smoothing.
+
+Both plugin menus show the current mode and provide a toggle. The full menu can
+also save your choice before entering free camera. The hotkey respects menus,
+dialogs, text/chat input, the console and application focus. It is configurable
+as `[Keys] ToggleCinematicMode = Alpha0` in the configuration file; no key-binding
+editor is added to the settings menu.
+
+Only cinematic mode captures the movement keys in the game's Craft/Character
+keyboard maps. General mode restores their exact prior enabled states; the
+plugin's mode keys (`0` and `=` by default) remain captured until free camera
+exits. Other map categories, modified-key bindings, mouse and controller inputs
+are unchanged. See the [mode test checklist](doc/CINEMATIC_MODE_TESTING.md).
+
+### Speed and acceleration
+
 Open the full settings menu with `ScrollLock` (or the settings button in the
 quick menu). Under **Numeric settings**, edit **Normal position acceleration
 (m/s²)** and **Fast position acceleration (m/s²)** independently, then click
@@ -93,9 +123,9 @@ quick menu). Under **Numeric settings**, edit **Normal position acceleration
 mode. Both support `0–1000000` and are saved as `[Movement] NormalAcceleration`
 and `FastAcceleration`.
 
-The active mode's acceleration limits how quickly the camera's position velocity
-can change when starting, releasing movement input or changing direction. A mode
-switch preserves the current velocity and immediately uses the new mode's rate,
+The active speed setting's acceleration limits how quickly the camera's position
+velocity can change when starting, releasing movement input or changing direction.
+Switching normal/fast speed preserves the current velocity and uses the new rate,
 including braking when switching from fast to normal. Keyboard and quick-menu
 movement buttons use the same behavior. Velocity is retained in world space, so changing the view
 direction while moving produces a gradual turn in the travel path. Acquiring a
@@ -120,8 +150,10 @@ stopping distance.
 These settings affect position only. Mouse-look rotation, immediate dynamic
 target focus, and FOV zoom keep their independent settings. A focused camera may
 finish braking from your movement input, but the target itself never pulls its
-position. Opening the full menu, losing input focus, leaving free camera, or a
-frame interruption longer than `0.25 s` still clears movement immediately.
+position. Switching to general mode, opening the full menu, losing input focus,
+leaving free camera, or a frame interruption longer than `0.25 s` clears movement
+immediately. Switching cinematic movement off/on retains the normal/fast speed
+choice within the current free-camera session, but movement resumes from rest.
 
 ## Lock-on behavior
 
@@ -257,10 +289,13 @@ starting the game:
 .\test-movement.ps1
 ```
 
-Camera-input tests exercise production entry and pointer-routing methods with
-minimal Unity/UI test doubles. They cover roll reset, continuous target-box
-crossing, wheel input, UI protection and event-system changes; they do not replace
-in-game rendering and interaction checks.
+Camera-input tests exercise production entry, pointer routing, movement-mode
+methods and the keyboard-capture class with minimal Unity/UI/Rewired doubles.
+They cover roll reset, target-box crossings, wheel input, UI protection, mode
+defaults and keyboard gates, immediate stopping, exact binding restoration and
+control-map lifecycle events. The configuration double models saved values but
+does not verify disk I/O. These tests do not replace in-game rendering and
+interaction checks.
 
 The FOV tests cover unit-sphere projection, wheel ratios, state changes, silent
 limits, near-distance safety, viewport aspect changes, and shared zoom smoothing.

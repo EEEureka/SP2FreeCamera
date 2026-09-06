@@ -8,7 +8,8 @@ using UnityEngine;
 namespace SP2FreeCamera
 {
     /// <summary>
-    /// Temporarily owns unmodified camera keys (movement and the auto-FOV toggle)
+    /// Temporarily owns unmodified camera keys (mode toggles and, when cinematic
+    /// movement is enabled, movement keys)
     /// that can also control the local craft or character. Controller maps
     /// themselves are never disabled.
     /// </summary>

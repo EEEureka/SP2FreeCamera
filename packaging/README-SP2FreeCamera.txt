@@ -14,7 +14,8 @@ Installation:
 Default controls:
 - Insert: enter or exit free camera
 - ScrollLock: open or close the plugin settings menu
-- W / S / A / D / E / Q: move the camera
+- Main keyboard 0: toggle cinematic/general mode (default on, saved locally)
+- W / S / A / D / E / Q: move the camera in cinematic mode; control the game in general mode
 - Keypad 5: toggle normal and fast movement speed
 - Normal movement speed: 200 m/s; fast movement speed: 2000 m/s
 - Backspace: focus on your current vehicle or avatar
@@ -30,10 +31,22 @@ Camera entry and mouse input:
 - Dragging may start over a target box and continue across its boundary; middle-click picking also works.
 - Plugin menus, foreground game controls, dialogs, text fields and the console retain input protection.
 
-Position movement:
+Cinematic/general mode:
+- Main keyboard 0 (not Numpad 0) toggles the mode while free camera is active.
+- Cinematic mode starts enabled by default. Your choice is saved across game restarts.
+- On: movement keys and quick-menu buttons move the camera using the existing speed and acceleration.
+- Off (general mode): stop position movement immediately and return movement keys to the game, including Q/E yaw.
+- Quick-menu movement and speed buttons are disabled in general mode.
+- Both menus show the mode and provide a toggle. Mouse look, target focus and manual/automatic FOV remain available.
+- Switching modes does not reset focus, interrupt a drag or reset FOV smoothing.
+- Menus, dialogs, text/chat input, the console and application focus protect the toggle hotkey.
+- Configuration: [Movement] CinematicModeEnabled = true; [Keys] ToggleCinematicMode = Alpha0.
+
+Position movement (cinematic mode only):
 - In the full menu, set Normal/Fast position acceleration (m/s²), then Apply values.
 - Defaults: normal 80 m/s²; fast 800 m/s². Starts, braking and turns use the active mode.
-- Switching modes preserves velocity and uses the new mode's acceleration or braking rate.
+- Switching normal/fast speed preserves velocity and uses the new speed setting's acceleration or braking rate.
+- Switching cinematic movement off/on keeps the speed choice in the current session but clears position velocity.
 - Lower values give longer glides. Releasing movement input gradually brakes.
 - Movement smoothing (default 0.08 s) softens the final transition.
 - Acceleration 0 disables that mode's limit. Set its acceleration and smoothing to 0 for instant movement.

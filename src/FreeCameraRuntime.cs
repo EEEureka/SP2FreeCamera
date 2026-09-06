@@ -36,6 +36,7 @@ namespace SP2FreeCamera
         private bool _active;
         private bool _controllerRegistered;
         private bool _fastMode;
+        private bool _lastCinematicModeEnabled;
         private bool _autoFovEnabled;
         private bool _menuVisible;
         private bool _menuPointerCaptured;
@@ -90,6 +91,19 @@ namespace SP2FreeCamera
         internal bool AutoFovEnabled
         {
             get { return _autoFovEnabled; }
+        }
+
+        internal bool CinematicModeEnabled
+        {
+            get { return _settings != null && _settings.CinematicModeEnabled.Value; }
+        }
+
+        internal string CinematicModeStatusText
+        {
+            get
+            {
+                return Localization.Text(CinematicModeEnabled ? "CinematicModeOn" : "CinematicModeOff");
+            }
         }
 
         internal string AutoFovStatusText
@@ -168,7 +182,7 @@ namespace SP2FreeCamera
         {
             get
             {
-                return _quickMenu != null
+                return CinematicModeEnabled && _quickMenu != null
                     ? _quickMenu.MovementAxes
                     : Vector3.zero;
             }
@@ -187,6 +201,7 @@ namespace SP2FreeCamera
         internal void Initialize(Plugin settings)
         {
             _settings = settings;
+            _lastCinematicModeEnabled = CinematicModeEnabled;
             Instance = this;
             _menu = new FreeCameraMenu(this);
             _quickMenu = new FreeCameraQuickMenu(this);
@@ -202,6 +217,9 @@ namespace SP2FreeCamera
                 return;
             }
 
+            // Also reconcile a configuration reload on the Unity thread. Menu and
+            // hotkey changes apply synchronously through SetCinematicModeEnabled.
+            ApplyCinematicModeIfChanged();
             ValidateInactiveMenuCursorOwner();
             if (_quickMenu != null)
             {
@@ -256,6 +274,7 @@ namespace SP2FreeCamera
             }
 
             bool canProcessKeyboardInput = CanProcessKeyboardInput();
+            ProcessCinematicModeHotkey(canProcessKeyboardInput);
             KeyCode toggleAutoFovKey = _settings.ToggleAutoFovKey.Value;
             if (toggleAutoFovKey != KeyCode.None && canProcessKeyboardInput &&
                 Input.GetKeyDown(toggleAutoFovKey))
@@ -378,17 +397,7 @@ namespace SP2FreeCamera
                     throw new System.InvalidOperationException("Camera manager rejected the free camera controller.");
                 }
 
-                if (_keyboardCapture != null)
-                {
-                    _keyboardCapture.Capture(
-                        _settings.MoveForwardKey.Value,
-                        _settings.MoveBackwardKey.Value,
-                        _settings.MoveLeftKey.Value,
-                        _settings.MoveRightKey.Value,
-                        _settings.MoveUpKey.Value,
-                        _settings.MoveDownKey.Value,
-                        _settings.ToggleAutoFovKey.Value);
-                }
+                RefreshKeyboardCapture();
 
                 if (_settings.AutoHideUi.Value)
                 {
@@ -426,8 +435,83 @@ namespace SP2FreeCamera
 
         internal void ToggleFastMode()
         {
+            if (!_active || !CinematicModeEnabled)
+            {
+                return;
+            }
             _fastMode = !_fastMode;
             Notify(_fastMode ? "已切换为快速移动。" : "已切换为普通移动。", false);
+        }
+
+        private void ProcessCinematicModeHotkey(bool canProcessKeyboardInput)
+        {
+            KeyCode key = _settings.ToggleCinematicModeKey.Value;
+            if (canProcessKeyboardInput && key != KeyCode.None && Input.GetKeyDown(key))
+            {
+                SetCinematicModeEnabled(!CinematicModeEnabled);
+            }
+        }
+
+        internal void SetCinematicModeEnabled(bool enabled)
+        {
+            if (_shuttingDown || _settings == null || CinematicModeEnabled == enabled)
+            {
+                return;
+            }
+
+            // BepInEx saves changed configuration entries to disk automatically.
+            _settings.CinematicModeEnabled.Value = enabled;
+            ApplyCinematicModeIfChanged();
+            Notify(CinematicModeStatusText, false);
+        }
+
+        private void ApplyCinematicModeIfChanged()
+        {
+            if (_lastCinematicModeEnabled == CinematicModeEnabled)
+            {
+                return;
+            }
+
+            _lastCinematicModeEnabled = CinematicModeEnabled;
+            if (_freeCameraController != null)
+            {
+                // A mode change stops translation immediately, without touching
+                // mouse drag, look smoothing, target focus or pending FOV input.
+                _freeCameraController.ResetMovement();
+            }
+            if (_quickMenu != null)
+            {
+                _quickMenu.ResetMovementInput();
+            }
+            RefreshKeyboardCapture();
+        }
+
+        private void RefreshKeyboardCapture()
+        {
+            if (_keyboardCapture == null)
+            {
+                return;
+            }
+
+            // Capture alone does not release keys removed from its key set.
+            // Restore the exact previous binding states before recapturing, in
+            // the same call, so movement keys return to the game immediately.
+            _keyboardCapture.Restore();
+            if (!_active)
+            {
+                return;
+            }
+
+            bool cinematic = CinematicModeEnabled;
+            _keyboardCapture.Capture(
+                cinematic ? _settings.MoveForwardKey.Value : KeyCode.None,
+                cinematic ? _settings.MoveBackwardKey.Value : KeyCode.None,
+                cinematic ? _settings.MoveLeftKey.Value : KeyCode.None,
+                cinematic ? _settings.MoveRightKey.Value : KeyCode.None,
+                cinematic ? _settings.MoveUpKey.Value : KeyCode.None,
+                cinematic ? _settings.MoveDownKey.Value : KeyCode.None,
+                _settings.ToggleAutoFovKey.Value,
+                _settings.ToggleCinematicModeKey.Value);
         }
 
         internal void SetAutoFovEnabled(bool enabled)

@@ -12,7 +12,7 @@ namespace SP2FreeCamera
     {
         public const string PluginGuid = "local.sp2.freecamera";
         public const string PluginName = "SP2 Free Camera";
-        public const string PluginVersion = "0.6.9";
+        public const string PluginVersion = "0.6.10";
 
         internal const float DefaultNormalSpeed = 200f;
         internal const float DefaultFastSpeed = 2000f;
@@ -35,6 +35,8 @@ namespace SP2FreeCamera
         internal ConfigEntry<string> Language { get; private set; }
 
         internal ConfigEntry<bool> Enabled { get; private set; }
+
+        internal ConfigEntry<bool> CinematicModeEnabled { get; private set; }
 
         internal ConfigEntry<float> NormalSpeed { get; private set; }
 
@@ -79,6 +81,8 @@ namespace SP2FreeCamera
         internal ConfigEntry<KeyCode> ToggleCameraKey { get; private set; }
 
         internal ConfigEntry<KeyCode> ToggleMenuKey { get; private set; }
+
+        internal ConfigEntry<KeyCode> ToggleCinematicModeKey { get; private set; }
 
         internal ConfigEntry<KeyCode> MoveForwardKey { get; private set; }
 
@@ -166,6 +170,12 @@ namespace SP2FreeCamera
                 "Enabled",
                 true,
                 Localization.Text("ConfigEnabled"));
+
+            CinematicModeEnabled = Config.Bind(
+                "Movement",
+                "CinematicModeEnabled",
+                true,
+                Localization.Text("ConfigCinematicMode"));
 
             NormalSpeed = Config.Bind(
                 "Movement",
@@ -290,6 +300,10 @@ namespace SP2FreeCamera
                 "ToggleAutoFov",
                 KeyCode.Equals,
                 Localization.Text("ConfigToggleAutoFov"));
+            ToggleCinematicModeKey = BindKey(
+                "ToggleCinematicMode",
+                KeyCode.Alpha0,
+                Localization.Text("ConfigToggleCinematicMode"));
 
             KeyBindingRevision = Config.Bind(
                 "Internal",
@@ -442,6 +456,7 @@ namespace SP2FreeCamera
             {
                 ToggleCameraKey,
                 ToggleMenuKey,
+                ToggleCinematicModeKey,
                 MoveForwardKey,
                 MoveBackwardKey,
                 MoveLeftKey,

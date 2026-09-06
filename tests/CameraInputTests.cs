@@ -49,13 +49,26 @@ namespace UnityEngine
         public float x, y, z;
         public Vector3(float x, float y, float z = 0f) { this.x = x; this.y = y; this.z = z; }
         public static Vector3 zero { get { return new Vector3(); } }
+        public float sqrMagnitude { get { return x * x + y * y + z * z; } }
+        public float magnitude { get { return (float)Math.Sqrt(sqrMagnitude); } }
+        public void Normalize() { float size = magnitude; if (size > 0f) this = this * (1f / size); }
+        public static Vector3 operator +(Vector3 a, Vector3 b) { return new Vector3(a.x + b.x, a.y + b.y, a.z + b.z); }
+        public static Vector3 operator -(Vector3 a, Vector3 b) { return new Vector3(a.x - b.x, a.y - b.y, a.z - b.z); }
+        public static Vector3 operator *(Vector3 a, float b) { return new Vector3(a.x * b, a.y * b, a.z * b); }
     }
     public struct Quaternion
     {
         public Vector3 eulerAngles;
         public static Quaternion Euler(Vector3 euler) { return new Quaternion { eulerAngles = euler }; }
     }
-    public sealed class Transform { public Vector3 position; public Quaternion rotation; }
+    public sealed class Transform
+    {
+        public Vector3 position;
+        public Quaternion rotation;
+        public Vector3 forward = new Vector3(0f, 0f, 1f), right = new Vector3(1f, 0f, 0f), up = new Vector3(0f, 1f, 0f);
+    }
+    public enum KeyCode { None = 0, Alpha0 = 48, Equals = 61, A = 97, D = 100, E = 101, Q = 113, S = 115, W = 119, Keypad0 = 256, Keypad5 = 261 }
+    public static class Time { public static float unscaledTime; }
     public static class Mathf
     {
         public static float Abs(float value) { return Math.Abs(value); }
@@ -65,6 +78,9 @@ namespace UnityEngine
     public static class Screen { public static int width = 1920, height = 1080; }
     public static class Input
     {
+        public static readonly HashSet<KeyCode> HeldKeys = new HashSet<KeyCode>(), DownKeys = new HashSet<KeyCode>();
+        public static bool GetKey(KeyCode key) { return HeldKeys.Contains(key); }
+        public static bool GetKeyDown(KeyCode key) { return DownKeys.Contains(key); }
         public static Vector3 mousePosition;
         public static Vector2 mouseScrollDelta;
         public static bool LeftDown, LeftHeld, LeftUp, MiddleDown;
@@ -147,8 +163,8 @@ namespace SP2FreeCamera
         }
     }
     internal sealed class TestSetting { public float Value = 4f; }
-    internal sealed class TestSettings { public TestSetting DragThresholdPixels = new TestSetting(); }
-    internal sealed class FreeCameraRuntime
+    internal sealed partial class Plugin { public TestSetting DragThresholdPixels = new TestSetting(); }
+    internal sealed partial class FreeCameraRuntime
     {
         internal bool _active = true, _menuVisible = false, PluginUiBlocked = false;
         internal FlightUIScript _flightUi = new FlightUIScript();
@@ -156,7 +172,8 @@ namespace SP2FreeCamera
         private readonly List<MonoBehaviour> _pointerHitBehaviours = new List<MonoBehaviour>(8);
         private EventSystem _pointerEventSystem;
         private PointerEventData _pointerEventData;
-        internal TestSettings Settings = new TestSettings();
+        internal Plugin _settings = new Plugin();
+        internal Plugin Settings { get { return _settings; } }
         internal bool ShouldBlockScreenInput(Vector2 position) { return PluginUiBlocked; }
         // RUNTIME_METHODS
     }
@@ -168,7 +185,7 @@ namespace SP2FreeCamera
         public string Name = "FreeCamera";
         public virtual void OnSelected() { }
     }
-    internal sealed class FreeCameraController : CameraController
+    internal sealed partial class FreeCameraController : CameraController
     {
         private readonly FreeCameraRuntime _runtime;
         internal float _yaw, _pitch, _roll, _targetYaw, _targetPitch, _targetRoll;
@@ -180,13 +197,13 @@ namespace SP2FreeCamera
         private Vector2 _leftPressPosition, _lastMousePosition;
         internal int CancelledLooks = 0, PickCount = 0, ClearFocusCount = 0;
         internal Vector2 LookDelta;
-        internal FreeCameraController(FreeCameraRuntime runtime) { _runtime = runtime; }
+        internal FreeCameraController(FreeCameraRuntime runtime) { _runtime = runtime; runtime._freeCameraController = this; }
         private void ResetAutoFovReference() { }
         private void ResetFocusTrackingState() { }
         private void SetAppliedFov(float fov) { AppliedFov = fov; }
         private void UpdateCursor() { }
         private void ResetInputSmoothing() { ResetPointerState(); CancelLookSmoothing(); }
-        private void ProcessMovement(float dt, bool allowed) { }
+        private void ApplyCameraDisplacement(Vector3 displacement) { CameraTransform.position += displacement; }
         private void UpdateSmoothedLook(float dt) { }
         private void UpdateUnlockedFocalPosition() { }
         private void ClearFocusTarget(bool notify) { ClearFocusCount++; }
@@ -218,6 +235,7 @@ namespace SP2FreeCamera.Tests
             Assets.Scripts.Game.Instance = new Assets.Scripts.Game();
             EventSystem.current = new EventSystem();
             Application.isFocused = true;
+            Input.HeldKeys.Clear(); Input.DownKeys.Clear();
             Frame(100f);
             return new FreeCameraRuntime();
         }
