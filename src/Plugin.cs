@@ -12,7 +12,7 @@ namespace SP2FreeCamera
     {
         public const string PluginGuid = "local.sp2.freecamera";
         public const string PluginName = "SP2 Free Camera";
-        public const string PluginVersion = "0.6.10";
+        public const string PluginVersion = "0.6.11";
 
         internal const float DefaultNormalSpeed = 200f;
         internal const float DefaultFastSpeed = 2000f;
@@ -35,6 +35,8 @@ namespace SP2FreeCamera
         internal ConfigEntry<string> Language { get; private set; }
 
         internal ConfigEntry<bool> Enabled { get; private set; }
+
+        internal ConfigEntry<bool> FirstPersonFocusEnabled { get; private set; }
 
         internal ConfigEntry<bool> CinematicModeEnabled { get; private set; }
 
@@ -170,6 +172,12 @@ namespace SP2FreeCamera
                 "Enabled",
                 true,
                 Localization.Text("ConfigEnabled"));
+
+            FirstPersonFocusEnabled = Config.Bind(
+                "FirstPerson",
+                "FocusEnabled",
+                true,
+                Localization.Text("ConfigFirstPersonFocus"));
 
             CinematicModeEnabled = Config.Bind(
                 "Movement",

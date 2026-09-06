@@ -3,7 +3,7 @@
 # SP2 Free Camera
 
 `SP2 Free Camera` is a local free-camera plugin for the Windows x64 edition of
-`SimplePlanes 2`. The current version is `0.6.10`. It uses the BepInEx 5 Mono x64
+`SimplePlanes 2`. The current version is `0.6.11`. It uses the BepInEx 5 Mono x64
 runtime and is built for game version `0.7.6.100f`. The plugin only controls the
 local camera and local UI: it does not modify vehicle physics, send network
 messages, or depend on other custom plugins.
@@ -12,7 +12,7 @@ messages, or depend on other custom plugins.
 
 The `release` directory contains a ready-to-install archive:
 
-[`release/SP2FreeCamera-v0.6.10-win-x64.zip`](release/SP2FreeCamera-v0.6.10-win-x64.zip)
+[`release/SP2FreeCamera-v0.6.11-win-x64.zip`](release/SP2FreeCamera-v0.6.11-win-x64.zip)
 
 The archive includes both the Free Camera DLL and the complete BepInEx `5.4.23.5`
 Windows x64 runtime, so BepInEx does not need to be installed separately.
@@ -84,6 +84,39 @@ can start a drag over a target box and continue across its boundary. This applie
 to both manual FOV and automatic-FOV reference-area adjustment; middle-click
 focus selection uses the same boundary. Plugin menus, foreground game controls,
 dialogs, text fields and the developer console still retain their input.
+
+## Native first-person target lock
+
+First-person target locking is available without entering free camera.
+
+- Middle-click terrain, a moving ground target or another aircraft's part to
+  keep looking at the selected point. The local cockpit/avatar is excluded from
+  this ray. A locked mouse cursor uses the camera viewport center.
+- Press main-keyboard `-` to look at the game's currently selected target.
+  Changing the game's selection afterward does not retarget this camera lock.
+- Manual native look input or the native recenter action releases the lock.
+  Switching cameras clears it; wheel zoom and vehicle controls remain native.
+- Outside freecam, **Backspace** releases any lock and calls the supported
+  first-person camera's native recenter action, even without a target. Native
+  roll and recenter transitions are retained. Under Look At Cockpit, it only
+  recenters the native look offset; it does not override the cockpit target.
+  Freecam's Backspace still focuses on your own vehicle/avatar. Menus, text/chat,
+  the console, pause and application focus protect this shortcut.
+- Classic cockpit, player first-person and ordinary first-person camera parts
+  are supported. Targeting/weapon pods, Orbit, Chase, Fly-by and VR are excluded.
+- **Look At Cockpit takes priority.** When enabled, this extension does not
+  acquire targets, consume middle input or override the native camera rotation.
+- Camera position, focal position and FOV stay under native control. Mounted
+  roll, Auto Orient and the seated player's native Chicken Head correction are
+  retained. Freecam still levels its roll on entry and keeps its existing
+  dynamic-target tracking algorithm.
+
+The extension defaults to on, independently of freecam's cinematic/general mode.
+Set `[FirstPerson] FocusEnabled = false` in the plugin configuration to disable
+it. It shares `[Keys] FocusSelectedTarget` and the maximum picking distance, but
+does not inherit freecam zoom or rotation smoothing. In on-foot first person,
+the game's view-relative walking direction naturally follows the locked view.
+See the [behavior and regression checklist](doc/FIRST_PERSON_FOCUS_TESTING.md).
 
 ## Cinematic position movement
 

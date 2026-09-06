@@ -25,6 +25,7 @@ namespace SP2FreeCamera
         private CameraManagerScript _cameraManager;
         private CameraController _previousController;
         private FreeCameraController _freeCameraController;
+        private FirstPersonFocus _firstPersonFocus;
         private FlightUIScript _flightUi;
         private readonly List<RaycastResult> _pointerRaycastResults =
             new List<RaycastResult>(8);
@@ -81,6 +82,11 @@ namespace SP2FreeCamera
         internal bool Active
         {
             get { return _active; }
+        }
+
+        internal FirstPersonFocus FirstPersonFocus
+        {
+            get { return _firstPersonFocus; }
         }
 
         internal bool FastMode
@@ -208,6 +214,7 @@ namespace SP2FreeCamera
             _keyboardCapture = new FreeCameraKeyboardCapture(Plugin.Log);
             _menuInputBlocker = gameObject.AddComponent<FreeCameraMenuInputBlocker>();
             _menuInputBlocker.Initialize(this);
+            _firstPersonFocus = new FirstPersonFocus(this);
         }
 
         private void Update()
@@ -252,6 +259,8 @@ namespace SP2FreeCamera
             if (!_active)
             {
                 SynchronizeFlightUiState();
+                try { _firstPersonFocus.ProcessFrame(); }
+                catch (System.Exception) { _firstPersonFocus.DisableAfterError(); }
                 return;
             }
 
@@ -610,6 +619,38 @@ namespace SP2FreeCamera
             return global::Assets.Scripts.Game.Instance.UserInterface.AllowKeyboardInputs;
         }
 
+        internal bool CanProcessFirstPersonKeyboardInput()
+        {
+            global::Assets.Scripts.Game game = global::Assets.Scripts.Game.Instance;
+            return !_active && !_shuttingDown && !_menuVisible && Application.isFocused &&
+                !PauseManager.Paused && game != null && game.UserInterface != null &&
+                game.UserInterface.AllowKeyboardInputs;
+        }
+
+        internal bool CanProcessFirstPersonPointerInput(Vector2 position)
+        {
+            if (!CanProcessFirstPersonKeyboardInput() ||
+                position.x < 0f || position.y < 0f || position.x > Screen.width || position.y > Screen.height ||
+                ShouldBlockScreenInput(position))
+            {
+                return false;
+            }
+            FlightSceneScript scene = FlightSceneScript.Instance;
+            FlightUIScript flightUi = scene != null ? scene.FlightUI : null;
+            if (flightUi == null)
+            {
+                return false;
+            }
+            bool? cameraSurface = GetPointerCameraSurface(position);
+            if (cameraSurface.HasValue)
+            {
+                return cameraSurface.Value;
+            }
+            global::Assets.Scripts.Game game = global::Assets.Scripts.Game.Instance;
+            return game.UIInfo != null && !game.UIInfo.IsInteracting &&
+                (Cursor.lockState == CursorLockMode.Locked || !flightUi.Visible || flightUi.IsPointerInsideGameView);
+        }
+
         internal bool CanProcessPointerInput()
         {
             if (!CanProcessKeyboardInput() || _flightUi == null)
@@ -943,6 +984,10 @@ namespace SP2FreeCamera
 
         internal void PrepareForApplicationQuit()
         {
+            if (_firstPersonFocus != null)
+            {
+                _firstPersonFocus.Reset(false);
+            }
             _applicationQuitting = true;
             if (_keyboardCapture != null)
             {
@@ -973,6 +1018,11 @@ namespace SP2FreeCamera
             if (_shuttingDown && _applicationQuitting)
             {
                 return;
+            }
+
+            if (_firstPersonFocus != null)
+            {
+                _firstPersonFocus.Reset(restoreState);
             }
 
             _shuttingDown = true;

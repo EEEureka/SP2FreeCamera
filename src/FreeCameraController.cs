@@ -4,9 +4,6 @@ using Assets.Scripts.Craft.Parts;
 using Assets.Scripts.Flight;
 using Assets.Scripts.Flight.Combat;
 using Assets.Scripts.Flight.Cameras;
-using Assets.Scripts.Flight.WorldObjects.Vehicles.Land;
-using Assets.Scripts.Flight.WorldObjects.Vehicles.Sea;
-using Assets.Scripts.Multiplayer.ActivityFramework.Activities.MechInvasion;
 using UnityEngine;
 
 namespace SP2FreeCamera
@@ -17,7 +14,6 @@ namespace SP2FreeCamera
 
         private const float LostTargetGraceSeconds = 0.2f;
         private const float TargetJumpResetDistance = 100f;
-        private const float ReleasedWeaponEdgeTolerancePixels = 8f;
         private const float MaximumFallbackPredictionSeconds = 0.12f;
         private const float MaximumTrackingDeltaTime = 0.05f;
         private const float TrackingResetDeltaTime = 0.25f;
@@ -692,122 +688,17 @@ namespace SP2FreeCamera
                 _runtime.Notify("鼠标位置不在相机画面内，无法选择目标。", false);
                 return;
             }
-
             float maximumDistance = NumericUtility.ClampFinite(
-                _runtime.Settings.FocusMaximumDistance.Value,
-                100000f,
-                10f,
-                1000000f);
-            int layerMask =
-                (1 << Layers.DefaultLayer) |
-                (1 << Layers.CarLayer) |
-                (1 << Layers.AircraftInteractable) |
-                (1 << Layers.TerrainLayer) |
-                (1 << Layers.AircraftLayer) |
-                (1 << Layers.CarrierDeck) |
-                (1 << Layers.AircraftCollisionOnly) |
-                (1 << Layers.AircraftCollisionNone) |
-                (1 << Layers.RemoteAircraftLayer);
-
-            RaycastHit[] hits = Physics.RaycastAll(
-                ray,
-                maximumDistance,
-                layerMask,
-                QueryTriggerInteraction.Collide);
-
-            float nearestPartDistance = float.PositiveInfinity;
-            float nearestDynamicGroundTargetDistance = float.PositiveInfinity;
-            float nearestTerrainDistance = float.PositiveInfinity;
-            FocusTarget nearestPartTarget = null;
-            FocusTarget nearestDynamicGroundTarget = null;
-            FocusTarget nearestTerrainTarget = null;
-            for (int i = 0; i < hits.Length; i++)
+                _runtime.Settings.FocusMaximumDistance.Value, 100000f, 10f, 1000000f);
+            FocusTarget target = FocusSelection.Pick(camera, ray, screenPosition, maximumDistance);
+            if (target != null)
             {
-                RaycastHit hit = hits[i];
-                if (hit.collider == null)
-                {
-                    continue;
-                }
-
-                int hitLayer = hit.collider.gameObject.layer;
-                if (hit.collider.isTrigger && hitLayer != Layers.AircraftInteractable)
-                {
-                    continue;
-                }
-
-                PartScript part = hit.collider.GetComponentInParent<PartScript>();
-                if (part != null && hit.distance < nearestPartDistance)
-                {
-                    nearestPartTarget = FocusTarget.CreatePart(part, hit.collider, hit.point);
-                    nearestPartDistance = hit.distance;
-                    continue;
-                }
-
-                FocusTarget dynamicGroundTarget = TryCreateDynamicGroundTarget(
-                    hit.collider,
-                    hit.point);
-                if (dynamicGroundTarget != null &&
-                    hit.distance < nearestDynamicGroundTargetDistance)
-                {
-                    nearestDynamicGroundTarget = dynamicGroundTarget;
-                    nearestDynamicGroundTargetDistance = hit.distance;
-                    continue;
-                }
-
-                if (hitLayer == Layers.TerrainLayer && hit.distance < nearestTerrainDistance)
-                {
-                    nearestTerrainTarget = FocusTarget.CreateTerrain(hit.point);
-                    nearestTerrainDistance = hit.distance;
-                }
+                SetFocusTarget(target);
             }
-
-            float nearestOccluderDistance = Mathf.Min(
-                nearestPartDistance,
-                Mathf.Min(nearestDynamicGroundTargetDistance, nearestTerrainDistance));
-            ReleasedWeaponSelection releasedWeapon;
-            if (ReleasedWeaponSelectionHelper.TryFindNearScreenPoint(
-                    camera,
-                    screenPosition,
-                    maximumDistance,
-                    ReleasedWeaponEdgeTolerancePixels,
-                    nearestOccluderDistance,
-                    out releasedWeapon))
+            else
             {
-                string weaponName = Localization.Text(
-                    releasedWeapon.Kind == ReleasedWeaponKind.Missile ? "Missile" : "Bomb");
-                FocusTarget weaponTarget = FocusTarget.CreateTransform(
-                    releasedWeapon.AnchorTransform,
-                    releasedWeapon.WorldPosition,
-                    weaponName);
-                if (weaponTarget != null)
-                {
-                    SetFocusTarget(weaponTarget);
-                    return;
-                }
+                _runtime.Notify("鼠标方向未命中可锁定的地形、飞机部件、动态地面目标或离架武器。", false);
             }
-
-            if (nearestPartTarget != null &&
-                nearestPartDistance <= nearestDynamicGroundTargetDistance &&
-                nearestPartDistance <= nearestTerrainDistance)
-            {
-                SetFocusTarget(nearestPartTarget);
-                return;
-            }
-
-            if (nearestDynamicGroundTarget != null &&
-                nearestDynamicGroundTargetDistance <= nearestTerrainDistance)
-            {
-                SetFocusTarget(nearestDynamicGroundTarget);
-                return;
-            }
-
-            if (nearestTerrainTarget != null)
-            {
-                SetFocusTarget(nearestTerrainTarget);
-                return;
-            }
-
-            _runtime.Notify("鼠标方向未命中可锁定的地形、飞机部件、动态地面目标或离架武器。", false);
         }
 
         private bool TryCreateSelectionRay(Camera camera, Vector2 screenPosition, out Ray ray)
@@ -1498,54 +1389,6 @@ namespace SP2FreeCamera
             UpdateFloatingOriginFocus();
         }
 
-        private static FocusTarget TryCreateDynamicGroundTarget(
-            Collider collider,
-            Vector3 hitPosition)
-        {
-            if (collider == null)
-            {
-                return null;
-            }
-
-            GroundTarget target = null;
-            SinkableShipScript ship = collider.GetComponentInParent<SinkableShipScript>();
-            if (ship != null)
-            {
-                target = ship.Target;
-            }
-
-            if (target == null)
-            {
-                SimpleGroundVehicleScript vehicle =
-                    collider.GetComponentInParent<SimpleGroundVehicleScript>();
-                if (vehicle != null)
-                {
-                    target = vehicle.Target;
-                }
-            }
-
-            if (target == null)
-            {
-                MechScript mech = collider.GetComponentInParent<MechScript>();
-                if (mech != null)
-                {
-                    target = mech.Target;
-                }
-            }
-
-            if (target == null || target.IsDead)
-            {
-                return null;
-            }
-
-            string displayName = string.IsNullOrEmpty(target.Name)
-                ? Localization.Text("GameTarget")
-                : target.Name;
-            return FocusTarget.CreateDynamicGroundTarget(
-                collider.transform,
-                hitPosition,
-                displayName);
-        }
 
         private void UpdateUnlockedFocalPosition()
         {

@@ -8,6 +8,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Assets.Scripts.Flight.UI;
 using Assets.Scripts.Flight.UI.Targeting;
+using Assets.Scripts.Flight;
 
 namespace UnityEngine
 {
@@ -75,6 +76,8 @@ namespace UnityEngine
         public static float Clamp(float value, float min, float max) { return Math.Max(min, Math.Min(max, value)); }
     }
     public static class Application { public static bool isFocused = true; }
+    public enum CursorLockMode { None, Locked }
+    public static class Cursor { public static CursorLockMode lockState; }
     public static class Screen { public static int width = 1920, height = 1080; }
     public static class Input
     {
@@ -132,6 +135,15 @@ namespace Assets.Scripts.Flight.UI
     public sealed class FlightUIScript { public bool Visible = true, IsPointerInsideGameView = true; }
 }
 namespace Assets.Scripts.Flight.UI.Targeting { public interface ITargetBox { } }
+namespace Assets.Scripts.Flight
+{
+    public static class PauseManager { public static bool Paused; }
+    public sealed class FlightSceneScript
+    {
+        public static FlightSceneScript Instance;
+        public FlightUIScript FlightUI;
+    }
+}
 namespace Assets.Scripts.UI
 {
     public sealed class UserInterface
@@ -390,6 +402,48 @@ namespace SP2FreeCamera.Tests
             runtime._menuVisible = true; pick.ProcessFrame(1f / 60f);
             Require(pick.PickCount == 1, "Middle-click still respects menu protection");
             passed.Add("Middle-click picking uses the same target-transparent boundary without bypassing menus");
+
+            runtime = Reset(); runtime._active = false;
+            FlightSceneScript.Instance = new FlightSceneScript { FlightUI = runtime._flightUi };
+            Vector2 point = new Vector2(100f, 100f);
+            Hits(target, scene);
+            Require(runtime.CanProcessFirstPersonKeyboardInput(), "Native first-person input does not require freecam");
+            Require(runtime.CanProcessFirstPersonPointerInput(point), "Native picking passes target boxes");
+            Hits(button, target, scene);
+            Require(!runtime.CanProcessFirstPersonPointerInput(point), "Native picking respects frontmost real controls");
+            Hits(target, scene); runtime._menuVisible = true;
+            Require(!runtime.CanProcessFirstPersonKeyboardInput() && !runtime.CanProcessFirstPersonPointerInput(point), "Plugin menu blocks native lock keys and picks");
+            runtime._menuVisible = false; runtime.PluginUiBlocked = true;
+            Require(!runtime.CanProcessFirstPersonPointerInput(point), "Quick-menu captures remain protected");
+            runtime.PluginUiBlocked = false; runtime._active = true;
+            Require(!runtime.CanProcessFirstPersonKeyboardInput(), "Native module does not share freecam input ownership");
+            runtime._active = false; PauseManager.Paused = true;
+            Require(!runtime.CanProcessFirstPersonKeyboardInput(), "Paused game cannot acquire native lock");
+            PauseManager.Paused = false;
+            foreach(Action<Assets.Scripts.UI.UserInterface> block in new Action<Assets.Scripts.UI.UserInterface>[] {
+                ui => ui.AnyDialogsOpen = true, ui => ui.IsTextInputFocused = true, ui => ui.ConsoleOpen = true })
+            {
+                Assets.Scripts.Game.Instance.UserInterface = new Assets.Scripts.UI.UserInterface();
+                block(Assets.Scripts.Game.Instance.UserInterface);
+                Require(!runtime.CanProcessFirstPersonKeyboardInput(), "Native dialog/chat/console safety gate");
+            }
+            Assets.Scripts.Game.Instance.UserInterface = new Assets.Scripts.UI.UserInterface();
+            passed.Add("First-person pointer/key guards are independent of freecam while preserving target-box transparency and real UI/dialog/chat/console/pause boundaries");
+
+            EventSystem.current.Hits.Clear();
+            runtime._flightUi.IsPointerInsideGameView = false;
+            Cursor.lockState = CursorLockMode.Locked;
+            Require(runtime.CanProcessFirstPersonPointerInput(point), "Cursor-locked FPV does not require native hover callbacks");
+            Hits(button);
+            Require(!runtime.CanProcessFirstPersonPointerInput(point), "Locked cursor does not bypass real foreground controls");
+            Cursor.lockState = CursorLockMode.None; EventSystem.current.Hits.Clear();
+            Require(!runtime.CanProcessFirstPersonPointerInput(point), "Unlocked unknown UI falls back conservatively");
+            runtime._flightUi.IsPointerInsideGameView = true;
+            Require(!runtime.CanProcessFirstPersonPointerInput(new Vector2(-1, 100)), "Out-of-viewport pick rejected");
+            Application.isFocused = false;
+            Require(!runtime.CanProcessFirstPersonKeyboardInput(), "Unfocused native input rejected");
+            Application.isFocused = true;
+            passed.Add("Cursor-locked native first-person picking supports center rays without bypassing foreground controls, viewport or focus checks");
             return passed.ToArray();
         }
     }

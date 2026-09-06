@@ -42,6 +42,8 @@ $runtimeMethods = @(
     'internal bool CanProcessKeyboardInput()',
     'internal bool CanProcessPointerInput()',
     'internal bool CanProcessFocusSelectionInput()',
+    'internal bool CanProcessFirstPersonKeyboardInput()',
+    'internal bool CanProcessFirstPersonPointerInput(Vector2 position)',
     'private bool? GetPointerCameraSurface(Vector2 screenPosition)',
     'internal bool CinematicModeEnabled',
     'internal string CinematicModeStatusText',

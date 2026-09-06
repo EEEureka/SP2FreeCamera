@@ -31,6 +31,20 @@ Camera entry and mouse input:
 - Dragging may start over a target box and continue across its boundary; middle-click picking also works.
 - Plugin menus, foreground game controls, dialogs, text fields and the console retain input protection.
 
+Native first-person target lock:
+- Without entering freecam, middle-click terrain, moving ground targets or other aircraft parts.
+- Main keyboard minus locks the game's selected target; this never changes the game's weapon target.
+- Native mouse look/drag or recenter releases the lock; switching cameras clears it.
+- Outside freecam, Backspace clears any lock and recenters a supported first-person camera, even without a target.
+- Backspace uses native recenter/roll; with Look At Cockpit, it only resets the native look offset.
+- In freecam, Backspace still focuses on your own vehicle/avatar. UI, text/chat, console, pause and focus guards apply.
+- Supports classic cockpit, player FPV and ordinary first-person camera parts.
+- Weapon/targeting pods, Orbit, Chase, Fly-by and VR are excluded. Look At Cockpit takes priority.
+- Native mounting roll, Auto Orient and seated Chicken Head roll correction are preserved.
+- Camera position, focal position, FOV and vehicle controls stay native. A locked cursor picks at viewport center.
+- Default on: [FirstPerson] FocusEnabled = true. Independent of the cinematic/general switch.
+- Freecam retains its original roll reset and moving-target algorithm.
+
 Cinematic/general mode:
 - Main keyboard 0 (not Numpad 0) toggles the mode while free camera is active.
 - Cinematic mode starts enabled by default. Your choice is saved across game restarts.
