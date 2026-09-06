@@ -3,14 +3,14 @@
 # SP2 Free Camera（简体中文）
 
 `SP2 Free Camera` 是适用于 Windows x64 版 `SimplePlanes 2` 的本地自由相机插件。
-当前版本为 `0.6.8`，使用 `BepInEx 5 Mono x64` 加载，已针对游戏版本 `0.7.6.100f`
+当前版本为 `0.6.9`，使用 `BepInEx 5 Mono x64` 加载，已针对游戏版本 `0.7.6.100f`
 构建。插件只操作本地相机和本地 UI，不修改载具物理，不发送网络消息，也不依赖其他自定义插件。
 
 ## 直接安装
 
 仓库的 `release` 目录提供可部署压缩包：
 
-[`release/SP2FreeCamera-v0.6.8-win-x64.zip`](../release/SP2FreeCamera-v0.6.8-win-x64.zip)
+[`release/SP2FreeCamera-v0.6.9-win-x64.zip`](../release/SP2FreeCamera-v0.6.9-win-x64.zip)
 
 压缩包已经包含 Free Camera DLL 和完整的 BepInEx `5.4.23.5` Windows x64 运行时，
 不需要另行安装 BepInEx。
@@ -66,6 +66,14 @@ BepInEx/config/local.sp2.freecamera.cfg
 ```
 
 插件内置 English 和简体中文界面。可从快捷菜单或完整设置菜单切换语言。
+
+## 相机进入与鼠标输入
+
+进入自由相机时会立即将滚转角归零，使画面恢复水平，同时保留当前相机位置、航向、俯仰及 FOV。
+
+HUD 目标框不会中断鼠标左键拖拽，也不会拦截滚轮；可以在目标框上开始拖拽并连续跨过其边界。
+手动 FOV 与自动 FOV 参考面积调整均适用，中键选取目标也使用相同的输入边界。
+插件菜单、前景游戏控件、弹窗、文本输入框和开发者控制台仍保留原有输入保护。
 
 ## 电影感位置运镜
 
@@ -195,12 +203,16 @@ BepInEx 官方发行地址下载版本 `5.4.23.5`，并校验官方 SHA-256：
 `verify-release.ps1` 会复核压缩包文件白名单、BepInEx 逐文件哈希、DLL 版本，
 并扫描本机用户路径、仓库路径、UNC 路径和私网地址。
 
-无需启动游戏即可运行自动 FOV 与位置运动回归测试：
+无需启动游戏即可运行相机输入、自动 FOV 与位置运动回归测试：
 
 ```powershell
+.\test-camera-input.ps1
 .\test-auto-fov.ps1
 .\test-movement.ps1
 ```
+
+相机输入测试使用最小 Unity/UI 替身执行生产代码中的进入及鼠标输入判断方法，覆盖滚转归零、
+连续跨越目标框、滚轮、UI 保护及事件系统切换；这些源级测试不能替代实际游戏内的渲染与交互检查。
 
 FOV 测试覆盖单位球投影、滚轮比例、状态切换、静默限幅、近距离保护、视口宽高比变化及共用
 缩放平滑。运动测试覆盖加速、刹停距离、转向、反向、速度切换、平滑组合及不同画面帧率下的位移一致性。

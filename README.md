@@ -3,7 +3,7 @@
 # SP2 Free Camera
 
 `SP2 Free Camera` is a local free-camera plugin for the Windows x64 edition of
-`SimplePlanes 2`. The current version is `0.6.8`. It uses the BepInEx 5 Mono x64
+`SimplePlanes 2`. The current version is `0.6.9`. It uses the BepInEx 5 Mono x64
 runtime and is built for game version `0.7.6.100f`. The plugin only controls the
 local camera and local UI: it does not modify vehicle physics, send network
 messages, or depend on other custom plugins.
@@ -12,7 +12,7 @@ messages, or depend on other custom plugins.
 
 The `release` directory contains a ready-to-install archive:
 
-[`release/SP2FreeCamera-v0.6.8-win-x64.zip`](release/SP2FreeCamera-v0.6.8-win-x64.zip)
+[`release/SP2FreeCamera-v0.6.9-win-x64.zip`](release/SP2FreeCamera-v0.6.9-win-x64.zip)
 
 The archive includes both the Free Camera DLL and the complete BepInEx `5.4.23.5`
 Windows x64 runtime, so BepInEx does not need to be installed separately.
@@ -72,6 +72,17 @@ BepInEx/config/local.sp2.freecamera.cfg
 
 The plugin includes English and Simplified Chinese interfaces. The language can
 be changed from either the quick menu or the full settings menu.
+
+## Camera entry and mouse input
+
+Entering free camera immediately resets roll to zero, leveling the horizon while
+retaining the current camera position, heading, pitch and FOV.
+
+HUD target boxes do not interrupt left-mouse dragging or block wheel input. You
+can start a drag over a target box and continue across its boundary. This applies
+to both manual FOV and automatic-FOV reference-area adjustment; middle-click
+focus selection uses the same boundary. Plugin menus, foreground game controls,
+dialogs, text fields and the developer console still retain their input.
 
 ## Cinematic position movement
 
@@ -237,12 +248,19 @@ archive and verifies this pinned SHA-256 checksum:
 the plugin DLL version, and the absence of local user paths, repository paths,
 UNC paths, and private-network addresses.
 
-Run the automatic-FOV and position-movement regression tests without starting the game:
+Run the camera-input, automatic-FOV and position-movement regression tests without
+starting the game:
 
 ```powershell
+.\test-camera-input.ps1
 .\test-auto-fov.ps1
 .\test-movement.ps1
 ```
+
+Camera-input tests exercise production entry and pointer-routing methods with
+minimal Unity/UI test doubles. They cover roll reset, continuous target-box
+crossing, wheel input, UI protection and event-system changes; they do not replace
+in-game rendering and interaction checks.
 
 The FOV tests cover unit-sphere projection, wheel ratios, state changes, silent
 limits, near-distance safety, viewport aspect changes, and shared zoom smoothing.

@@ -98,6 +98,8 @@ The plugin supports free camera positioning for screenshots and cinematic video 
 - Clear focus and look freely: Hold and drag the left mouse button
 - Adjust FOV, or desired reference area while automatic FOV is active: Mouse wheel
 
+Entering free camera automatically levels the horizon by resetting roll, while retaining the camera's position, heading, pitch and FOV. Target boxes do not interrupt left-mouse dragging or block wheel zoom/reference-area adjustment. Menus, dialogs, text fields and other foreground game controls still retain their input.
+
 The default movement speeds are:
 
 - normal mode: `200 m/s`;

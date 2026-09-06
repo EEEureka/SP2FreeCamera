@@ -1,1 +1,1 @@
-def121bef1f462cc58ee5ed10b4b70db8e3366c4e6b67b936277d1f02184b2dc  SP2FreeCamera-v0.6.8-win-x64.zip
+da1f50d33675da000edb6ad160f27cc06a75a4c663d976e3e612588951c4540e  SP2FreeCamera-v0.6.9-win-x64.zip

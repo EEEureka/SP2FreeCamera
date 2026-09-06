@@ -24,6 +24,12 @@ Default controls:
 - Hold and drag the left mouse button: clear focus and look freely
 - Mouse wheel: adjust field of view, or desired reference area while automatic FOV is active
 
+Camera entry and mouse input:
+- Entering free camera immediately clears roll while retaining position, heading, pitch and FOV.
+- Target boxes do not interrupt left-mouse dragging or block wheel zoom/reference-area adjustment.
+- Dragging may start over a target box and continue across its boundary; middle-click picking also works.
+- Plugin menus, foreground game controls, dialogs, text fields and the console retain input protection.
+
 Position movement:
 - In the full menu, set Normal/Fast position acceleration (m/s²), then Apply values.
 - Defaults: normal 80 m/s²; fast 800 m/s². Starts, braking and turns use the active mode.

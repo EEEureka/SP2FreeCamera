@@ -11,6 +11,7 @@ using Assets.Scripts.Scenes.Startup;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace SP2FreeCamera
 {
@@ -25,8 +26,12 @@ namespace SP2FreeCamera
         private CameraController _previousController;
         private FreeCameraController _freeCameraController;
         private FlightUIScript _flightUi;
-        private readonly List<RaycastResult> _focusRaycastResults =
+        private readonly List<RaycastResult> _pointerRaycastResults =
             new List<RaycastResult>(8);
+        private readonly List<MonoBehaviour> _pointerHitBehaviours =
+            new List<MonoBehaviour>(8);
+        private EventSystem _pointerEventSystem;
+        private PointerEventData _pointerEventData;
 
         private bool _active;
         private bool _controllerRegistered;
@@ -523,8 +528,7 @@ namespace SP2FreeCamera
 
         internal bool CanProcessPointerInput()
         {
-            if (!CanProcessKeyboardInput() || global::Assets.Scripts.Game.Instance.UIInfo == null ||
-                global::Assets.Scripts.Game.Instance.UIInfo.IsInteracting)
+            if (!CanProcessKeyboardInput() || _flightUi == null)
             {
                 return false;
             }
@@ -541,95 +545,74 @@ namespace SP2FreeCamera
                 return false;
             }
 
-            FlightUIScript flightUi = _flightUi;
-            if (flightUi == null)
+            // Use this frame's frontmost UI hit for both target boxes and the
+            // game-view surface. UIInfo.IsInteracting and hover callbacks can
+            // lag behind a moving pointer/target box by a frame; trusting them
+            // here would cancel an accepted drag when entering OR leaving it.
+            bool? cameraSurface = GetPointerCameraSurface(mousePosition);
+            if (cameraSurface.HasValue)
             {
-                return false;
+                return cameraSurface.Value;
             }
 
-            return !flightUi.Visible || flightUi.IsPointerInsideGameView;
+            global::Assets.Scripts.Game game = global::Assets.Scripts.Game.Instance;
+            return game.UIInfo != null && !game.UIInfo.IsInteracting &&
+                (!_flightUi.Visible || _flightUi.IsPointerInsideGameView);
         }
 
         internal bool CanProcessFocusSelectionInput()
         {
-            global::Assets.Scripts.Game game = global::Assets.Scripts.Game.Instance;
-            global::Assets.Scripts.UI.UserInterface userInterface = game != null
-                ? game.UserInterface
-                : null;
-            if (!_active || _menuVisible || !Application.isFocused || userInterface == null ||
-                userInterface.AnyDialogsOpen || userInterface.IsTextInputFocused ||
-                SimplePlanesDevConsoleScript.IsConsoleOpen)
-            {
-                return false;
-            }
-
-            Vector3 mousePosition = Input.mousePosition;
-            if (mousePosition.x < 0f || mousePosition.y < 0f ||
-                mousePosition.x > Screen.width || mousePosition.y > Screen.height)
-            {
-                return false;
-            }
-
-            // Game HUD elements, including target boxes, intentionally do not block
-            // middle-click picking. Plugin-owned regions and unrelated game UI do.
-            if (ShouldBlockScreenInput(mousePosition))
-            {
-                return false;
-            }
-
-            FlightUIScript flightUi = _flightUi;
-            if (flightUi == null)
-            {
-                return false;
-            }
-
-            bool uiInteracting = game.UIInfo != null && game.UIInfo.IsInteracting;
-            if (!flightUi.Visible || (flightUi.IsPointerInsideGameView && !uiInteracting))
-            {
-                return true;
-            }
-
-            return IsPointerOverTargetBox(mousePosition);
+            // Picking, left-drag look and wheel zoom share the same UI boundary.
+            // Target boxes are transparent to camera input, not to all game UI.
+            return CanProcessPointerInput();
         }
 
-        private bool IsPointerOverTargetBox(Vector2 screenPosition)
+        private bool? GetPointerCameraSurface(Vector2 screenPosition)
         {
             EventSystem eventSystem = EventSystem.current;
             if (eventSystem == null)
             {
-                return false;
+                return null;
             }
 
-            PointerEventData eventData = new PointerEventData(eventSystem)
+            if (_pointerEventSystem != eventSystem || _pointerEventData == null)
             {
-                position = screenPosition
-            };
-            _focusRaycastResults.Clear();
-            eventSystem.RaycastAll(eventData, _focusRaycastResults);
-            for (int i = 0; i < _focusRaycastResults.Count; i++)
+                _pointerEventSystem = eventSystem;
+                _pointerEventData = new PointerEventData(eventSystem);
+            }
+            _pointerEventData.Reset();
+            _pointerEventData.position = screenPosition;
+            _pointerRaycastResults.Clear();
+            eventSystem.RaycastAll(_pointerEventData, _pointerRaycastResults);
+            for (int i = 0; i < _pointerRaycastResults.Count; i++)
             {
-                GameObject hitObject = _focusRaycastResults[i].gameObject;
-                if (hitObject == null)
+                RaycastResult hit = _pointerRaycastResults[i];
+                GameObject hitObject = hit.gameObject;
+                if (hitObject == null || !(hit.module is GraphicRaycaster))
                 {
+                    // A physics raycast against the rendered world is not UI.
                     continue;
                 }
 
-                MonoBehaviour[] behaviours =
-                    hitObject.GetComponentsInParent<MonoBehaviour>(includeInactive: false);
-                for (int j = 0; j < behaviours.Length; j++)
+                _pointerHitBehaviours.Clear();
+                hitObject.GetComponentsInParent(false, _pointerHitBehaviours);
+                for (int j = 0; j < _pointerHitBehaviours.Count; j++)
                 {
-                    if (behaviours[j] is ITargetBox)
+                    if (_pointerHitBehaviours[j] is ITargetBox)
                     {
                         return true;
                     }
                 }
 
-                // Raycast results are ordered front-to-back. A non-target UI result
-                // in front of the scene must keep the click instead of leaking through.
-                return false;
+                // Use the nearest input handler, so a real button/panel in front
+                // of the game view keeps its input instead of leaking through.
+                GameObject inputHandler =
+                    ExecuteEvents.GetEventHandler<IPointerDownHandler>(hitObject);
+                return inputHandler != null &&
+                    inputHandler.GetComponent<FlightScreenInputScript>() != null;
             }
 
-            return false;
+            return null;
         }
 
         internal void SetGameUiVisible(bool visible, bool closeMenuWhenHidden)

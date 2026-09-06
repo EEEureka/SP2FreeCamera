@@ -12,7 +12,7 @@ namespace SP2FreeCamera
     {
         public const string PluginGuid = "local.sp2.freecamera";
         public const string PluginName = "SP2 Free Camera";
-        public const string PluginVersion = "0.6.8";
+        public const string PluginVersion = "0.6.9";
 
         internal const float DefaultNormalSpeed = 200f;
         internal const float DefaultFastSpeed = 2000f;

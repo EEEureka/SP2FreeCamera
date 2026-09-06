@@ -254,7 +254,7 @@ namespace SP2FreeCamera
             ResetAutoFovReference();
             _smoothedMoveVelocity = Vector3.zero;
             ResetFocusTrackingState();
-            SyncLookAnglesFromCamera();
+            SyncLookAnglesFromCamera(resetRoll: true);
             SetAppliedFov(_currentFov);
             UpdateCursor();
         }
@@ -1722,7 +1722,7 @@ namespace SP2FreeCamera
             _focusTrackingSuspended = false;
         }
 
-        private void SyncLookAnglesFromCamera()
+        private void SyncLookAnglesFromCamera(bool resetRoll = false)
         {
             if (CameraTransform == null)
             {
@@ -1731,6 +1731,14 @@ namespace SP2FreeCamera
             }
 
             Vector3 euler = CameraTransform.rotation.eulerAngles;
+            if (resetRoll)
+            {
+                // Level the horizon immediately on entry, without changing the
+                // inherited position, heading, pitch or FOV. Do not smooth roll
+                // back from the previous controller on the first mouse drag.
+                euler.z = 0f;
+                CameraTransform.rotation = Quaternion.Euler(euler);
+            }
             _yaw = euler.y;
             _pitch = euler.x > 180f ? euler.x - 360f : euler.x;
             _roll = euler.z > 180f ? euler.z - 360f : euler.z;
